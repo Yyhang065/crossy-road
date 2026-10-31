@@ -1,52 +1,150 @@
-<!-- Start Screen with Version & Update Log -->
-  <div id="home-screen">
-    <div class="title">CROSSY ROAD</div>
-    <div class="version-badge">v1.0.1</div>
-    
-    <div class="btn-group">
-      <button id="start-btn">TAP TO PLAY</button>
-      <button id="log-btn">UPDATE LOG</button>
-    </div>
-
-    <!-- Update Log Modal -->
-    <div id="log-modal" class="hidden">
-      <div class="modal-content">
-        <h2>Patch Notes</h2>
-        <div class="log-entries">
-          <div class="log-entry current">
-            <div class="log-header">
-              <span class="tag">v1.0.1</span>
-              <span class="date">Latest</span>
-            </div>
-            <ul>
-              <li>Added start home screen and versioning.</li>
-              <li>Integrated interactive in-game changelog.</li>
-              <li>Split project into modular ES modules (`src/`).</li>
-            </ul>
-          </div>
-
-          <div class="log-entry">
-            <div class="log-header">
-              <span class="tag">v1.0.0</span>
-            </div>
-            <ul>
-              <li>Upgraded to full 3D Voxel Chicken mesh.</li>
-              <li>Added traffic lanes with moving cars and collision detection.</li>
-              <li>Introduced on-screen iPad directional touch controls.</li>
-              <li>Procedural lane generation and scoring system.</li>
-            </ul>
-          </div>
-
-          <div class="log-entry">
-            <div class="log-header">
-              <span class="tag">v0.0.1</span>
-            </div>
-            <ul>
-              <li>Initial prototype: Three.js isometric test with white cube.</li>
-            </ul>
-          </div>
-        </div>
-        <button id="close-log-btn">CLOSE</button>
-      </div>
-    </div>
-  </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+  <title>Crossy Road 3D</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    * { box-sizing: border-box; touch-action: manipulation; user-select: none; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    #canvas-container {
+      width: 100vw;
+      height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    #score-board {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      color: #ffffff;
+      font-size: 40px;
+      font-weight: 900;
+      text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.4);
+      z-index: 10;
+    }
+    #controls {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: grid;
+      grid-template-columns: 68px 68px 68px;
+      grid-gap: 12px;
+      z-index: 10;
+    }
+    .btn {
+      width: 68px;
+      height: 68px;
+      background: rgba(255, 255, 255, 0.85);
+      border: 3px solid rgba(255, 255, 255, 0.95);
+      border-radius: 18px;
+      font-size: 24px;
+      color: #222;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    }
+    .btn:active {
+      transform: scale(0.92);
+      background: #ffffff;
+    }
+    #home-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+    }
+    #home-screen .title {
+      color: #fff;
+      font-size: 42px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-shadow: 3px 3px 0px #e74c3c, 6px 6px 0px #34495e;
+      margin-bottom: 8px;
+    }
+    #home-screen .version-badge {
+      background: #2ecc71;
+      color: #ffffff;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      align-items: center;
+    }
+    #start-btn {
+      background: #f1c40f;
+      color: #2c3e50;
+      border: none;
+      font-size: 22px;
+      font-weight: 900;
+      padding: 16px 36px;
+      border-radius: 14px;
+      box-shadow: 0 8px 0 #d4ac0d, 0 12px 20px rgba(0,0,0,0.3);
+      cursor: pointer;
+    }
+    #start-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 4px 0 #d4ac0d;
+    }
+    #log-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      border: 2px solid rgba(255, 255, 255, 0.6);
+      font-size: 15px;
+      font-weight: 700;
+      padding: 10px 24px;
+      border-radius: 12px;
+      cursor: pointer;
+      letter-spacing: 1px;
+    }
+    #log-modal {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 200;
+    }
+    .modal-content {
+      background: #1e272e;
+      color: #fff;
+      width: 85%;
+      max-width: 440px;
+      max-height: 75vh;
+      padding: 24px;
+      border-radius: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-content h
