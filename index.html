@@ -5,9 +5,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
   <title>Crossy Road 3D - v1.1.3</title>
   <link rel="stylesheet" href="./style.css">
+  
+  <!-- On-Screen Error Box -->
+  <style>
+    #debug-box {
+      display: none;
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      background: rgba(220, 20, 60, 0.95);
+      color: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 13px;
+      z-index: 99999;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  </style>
+  <script>
+    window.addEventListener('error', function(e) {
+      var box = document.getElementById('debug-box');
+      if (box) {
+        box.style.display = 'block';
+        box.textContent = '❌ JS ERROR:\n' + (e.message || e) + '\nat ' + (e.filename || '') + ':' + (e.lineno || '');
+      }
+    });
+  </script>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
+  <div id="debug-box"></div>
+
   <div id="top-bar">
     <div id="score-board">0</div>
     <div class="top-actions">
@@ -82,26 +114,9 @@
             <span class="date">Latest</span>
           </div>
           <ul>
-            <li>Fixed camera diagonal skew that pushed chicken off-screen.</li>
-            <li>Added dual-axis smooth tracking (X and Z) centered directly on the player.</li>
-            <li>Fixed chicken spawn height so it rests directly on top of grass lanes.</li>
-          </ul>
-        </div>
-        <div class="log-entry">
-          <div class="log-header">
-            <span class="tag">v1.1.2</span>
-          </div>
-          <ul>
-            <li>Initial camera centering tests.</li>
-          </ul>
-        </div>
-        <div class="log-entry">
-          <div class="log-header">
-            <span class="tag">v1.1.1</span>
-          </div>
-          <ul>
-            <li>Fixed procedural generation parameter crashes.</li>
-            <li>Resolved unhandled exceptions across floating platforms and trees.</li>
+            <li>Added diagnostic error screen logger.</li>
+            <li>Enforced Three.js pre-flight verification.</li>
+            <li>Resolved iPad touch gesture cancellation.</li>
           </ul>
         </div>
       </div>
