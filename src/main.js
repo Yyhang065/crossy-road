@@ -26,7 +26,6 @@ const d = 160;
 const aspect = window.innerWidth / window.innerHeight;
 const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 2000);
 
-// Lock rotation matrix once (removes camera sub-pixel shake)
 camera.rotation.order = 'YXZ';
 camera.rotation.y = -Math.PI / 4;
 camera.rotation.x = Math.atan(-1 / Math.sqrt(2));
@@ -39,7 +38,7 @@ const cameraPresets = {
 let camOffset = { ...cameraPresets.classic };
 camera.position.set(camOffset.x, camOffset.y, camOffset.z);
 
-// Renderer setup
+// Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -53,11 +52,11 @@ const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
 dirLight.position.set(120, 220, 80);
 scene.add(dirLight);
 
-// Chicken Character
+// Chicken
 const chicken = createChicken();
 scene.add(chicken);
 
-// Generate starter lanes (Fixed: passing floaters & obstacles)
+// Populate start map with all 6 arguments
 for (let i = 0; i < 40; i++) {
   lanes.push(createLane(i, STEP_SIZE, scene, vehicles, floaters, obstacles));
 }
@@ -146,17 +145,16 @@ setupUI({
   onPause: () => { isPaused = true; },
   onResume: () => { isPaused = false; },
   onRestart: () => { isPaused = false; resetRun(); },
-  onCameraChange: (mode) => { 
-    if (cameraPresets[mode]) camOffset = { ...cameraPresets[mode] }; 
+  onCameraChange: (mode) => {
+    if (cameraPresets[mode]) camOffset = { ...cameraPresets[mode] };
   }
 });
 
-// Main Animation Loop
+// Main Loop
 function animate(now) {
   requestAnimationFrame(animate);
   if (isPaused) return;
 
-  // Jump animation
   if (jump.isJumping) {
     const elapsed = now - jump.startTime;
     const t = Math.min(elapsed / jump.duration, 1);
@@ -182,12 +180,10 @@ function animate(now) {
     }
   }
 
-  // Linear smooth camera tracking
   const targetCamZ = -currentLane * STEP_SIZE;
   smoothCameraZ += (targetCamZ - smoothCameraZ) * 0.08;
   camera.position.set(camOffset.x, camOffset.y, smoothCameraZ + camOffset.z);
 
-  // Moving Vehicles
   for (let i = 0; i < vehicles.length; i++) {
     const v = vehicles[i];
     v.position.x += v.userData.lane.speed;
@@ -203,7 +199,6 @@ function animate(now) {
     }
   }
 
-  // Floating logs and lily pads
   let onFloater = false;
   for (let i = 0; i < floaters.length; i++) {
     const f = floaters[i];
@@ -223,7 +218,6 @@ function animate(now) {
     }
   }
 
-  // Water lane drowning check
   if (!jump.isJumping) {
     const lane = lanes[currentLane];
     if (lane && lane.type === 'water' && !onFloater) {
@@ -236,7 +230,6 @@ function animate(now) {
 }
 requestAnimationFrame(animate);
 
-// Resize handler
 window.addEventListener('resize', () => {
   const a = window.innerWidth / window.innerHeight;
   camera.left = -d * a;
