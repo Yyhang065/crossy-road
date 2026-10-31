@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-  <title>Crossy Road 3D - v1.1.2</title>
+  <title>Crossy Road 3D - v1.1.3</title>
   <link rel="stylesheet" href="./style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -21,7 +21,7 @@
   <!-- Start Screen -->
   <div id="home-screen" class="overlay-screen">
     <div class="title">CROSSY ROAD</div>
-    <div class="version-badge">v1.1.2</div>
+    <div class="version-badge">v1.1.3</div>
     <div class="btn-group">
       <button class="menu-btn" id="start-btn">TAP TO PLAY</button>
       <button class="menu-btn secondary-btn" id="log-btn">UPDATE LOG</button>
@@ -78,13 +78,21 @@
       <div class="log-entries">
         <div class="log-entry current">
           <div class="log-header">
-            <span class="tag">v1.1.2</span>
+            <span class="tag">v1.1.3</span>
             <span class="date">Latest</span>
           </div>
           <ul>
-            <li>Centered chicken directly in screen viewport.</li>
-            <li>Re-aligned orthographic camera tracking to follow player progression.</li>
-            <li>Fixed camera diagonal offset skew on wide displays.</li>
+            <li>Fixed camera diagonal skew that pushed chicken off-screen.</li>
+            <li>Added dual-axis smooth tracking (X and Z) centered directly on the player.</li>
+            <li>Fixed chicken spawn height so it rests directly on top of grass lanes.</li>
+          </ul>
+        </div>
+        <div class="log-entry">
+          <div class="log-header">
+            <span class="tag">v1.1.2</span>
+          </div>
+          <ul>
+            <li>Initial camera centering tests.</li>
           </ul>
         </div>
         <div class="log-entry">
@@ -92,18 +100,8 @@
             <span class="tag">v1.1.1</span>
           </div>
           <ul>
-            <li>Fixed procedural map loop parameter crashes.</li>
-            <li>Stabilized Three.js canvas initialization.</li>
-          </ul>
-        </div>
-        <div class="log-entry">
-          <div class="log-header">
-            <span class="tag">v1.1.0</span>
-          </div>
-          <ul>
-            <li>Added Water Lanes with logs and lily pads.</li>
-            <li>Added blocking Trees on grass lanes.</li>
-            <li>Introduced Long Trucks alongside standard cars.</li>
+            <li>Fixed procedural generation parameter crashes.</li>
+            <li>Resolved unhandled exceptions across floating platforms and trees.</li>
           </ul>
         </div>
       </div>
