@@ -10,39 +10,78 @@ export function setupUI(handlers) {
   const addTap = (id, fn) => {
     const el = get(id);
     if (!el) return;
-    el.addEventListener('click', fn);
+    const execute = (e) => {
+      e.stopPropagation();
+      fn();
+    };
+    el.addEventListener('pointerup', execute);
+    el.addEventListener('click', execute);
   };
 
   addTap('start-btn', () => {
-    if (homeScreen) homeScreen.classList.add('hidden');
+    if (homeScreen) {
+      homeScreen.classList.add('hidden');
+      homeScreen.style.display = 'none';
+    }
     handlers.onStart();
   });
 
-  addTap('log-btn', () => logDialog && logDialog.classList.remove('hidden'));
-  addTap('close-log-btn', () => logDialog && logDialog.classList.add('hidden'));
+  addTap('log-btn', () => {
+    if (logDialog) {
+      logDialog.classList.remove('hidden');
+      logDialog.style.display = 'flex';
+    }
+  });
 
-  const openSettings = () => settingsDialog && settingsDialog.classList.remove('hidden');
+  addTap('close-log-btn', () => {
+    if (logDialog) {
+      logDialog.classList.add('hidden');
+      logDialog.style.display = 'none';
+    }
+  });
+
+  const openSettings = () => {
+    if (settingsDialog) {
+      settingsDialog.classList.remove('hidden');
+      settingsDialog.style.display = 'flex';
+    }
+  };
+
   addTap('settings-home-btn', openSettings);
   addTap('settings-top-btn', openSettings);
   addTap('settings-pause-btn', openSettings);
-  addTap('close-settings-btn', () => settingsDialog && settingsDialog.classList.add('hidden'));
+
+  addTap('close-settings-btn', () => {
+    if (settingsDialog) {
+      settingsDialog.classList.add('hidden');
+      settingsDialog.style.display = 'none';
+    }
+  });
 
   addTap('pause-top-btn', () => {
-    if (pauseScreen) pauseScreen.classList.remove('hidden');
+    if (pauseScreen) {
+      pauseScreen.classList.remove('hidden');
+      pauseScreen.style.display = 'flex';
+    }
     handlers.onPause();
   });
 
   addTap('resume-btn', () => {
-    if (pauseScreen) pauseScreen.classList.add('hidden');
+    if (pauseScreen) {
+      pauseScreen.classList.add('hidden');
+      pauseScreen.style.display = 'none';
+    }
     handlers.onResume();
   });
 
   addTap('restart-btn', () => {
-    if (pauseScreen) pauseScreen.classList.add('hidden');
+    if (pauseScreen) {
+      pauseScreen.classList.add('hidden');
+      pauseScreen.style.display = 'none';
+    }
     handlers.onRestart();
   });
 
-  // Dynamic layout check
   let layoutMode = 'auto';
   function updateLayout() {
     if (!controlsContainer) return;
@@ -68,13 +107,4 @@ export function setupUI(handlers) {
 
   const camSelect = get('camera-select');
   if (camSelect) {
-    camSelect.addEventListener('change', (e) => handlers.onCameraChange(e.target.value));
-  }
-
-  const opSelect = get('opacity-select');
-  if (opSelect) {
-    opSelect.addEventListener('change', (e) => {
-      if (controlsContainer) controlsContainer.style.opacity = e.target.value;
-    });
-  }
-}
+    camSelect.addEventListener('change', (e) => handlers.onCameraChange(e
