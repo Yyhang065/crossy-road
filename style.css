@@ -1,99 +1,200 @@
-.btn-group {
+* { box-sizing: border-box; touch-action: manipulation; user-select: none; }
+body {
+  margin: 0;
+  overflow: hidden;
+  background: #000;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+#canvas-container {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+#top-bar {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
   display: flex;
-  flex-direction: column;
-  gap: 14px;
+  justify-content: space-between;
   align-items: center;
+  z-index: 10;
+  pointer-events: none;
 }
-
-#log-btn {
-  background: rgba(255, 255, 255, 0.2);
+#score-board {
   color: #ffffff;
-  border: 2px solid rgba(255, 255, 255, 0.6);
-  font-size: 15px;
-  font-weight: 700;
-  padding: 10px 24px;
-  border-radius: 12px;
+  font-size: 38px;
+  font-weight: 900;
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.4);
+}
+.top-actions {
+  display: flex;
+  gap: 10px;
+  pointer-events: auto;
+}
+.icon-btn {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 2px solid #ffffff;
+  border-radius: 14px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  letter-spacing: 1px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
+.icon-btn:active { transform: scale(0.92); }
 
-#log-btn:active {
-  background: rgba(255, 255, 255, 0.4);
+#controls {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: 68px 68px 68px;
+  grid-gap: 12px;
+  z-index: 10;
+  transition: opacity 0.2s ease;
 }
+.btn {
+  width: 68px;
+  height: 68px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 3px solid rgba(255, 255, 255, 0.95);
+  border-radius: 18px;
+  font-size: 24px;
+  color: #222;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+.btn:active { transform: scale(0.92); background: #ffffff; }
 
-/* Modal styles */
-#log-modal {
+.overlay-screen {
   position: absolute;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  z-index: 200;
+  z-index: 100;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+.title {
+  color: #fff;
+  font-size: 40px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-shadow: 3px 3px 0px #e74c3c, 6px 6px 0px #34495e;
+  margin-bottom: 6px;
+}
+.version-badge {
+  background: #2ecc71;
+  color: #ffffff;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin-bottom: 22px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+.btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  width: 240px;
+}
+.menu-btn {
+  width: 100%;
+  background: #f1c40f;
+  color: #2c3e50;
+  border: none;
+  font-size: 18px;
+  font-weight: 900;
+  padding: 14px 0;
+  border-radius: 14px;
+  box-shadow: 0 6px 0 #d4ac0d;
+  cursor: pointer;
+}
+.menu-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 3px 0 #d4ac0d;
+}
+.secondary-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  box-shadow: none;
+}
+.secondary-btn:active {
+  background: rgba(255, 255, 255, 0.35);
+  transform: none;
 }
 
-.modal-content {
+.dialog-card {
   background: #1e272e;
   color: #fff;
   width: 85%;
   max-width: 440px;
-  max-height: 75vh;
+  max-height: 80vh;
   padding: 24px;
   border-radius: 20px;
   border: 2px solid rgba(255, 255, 255, 0.15);
   display: flex;
   flex-direction: column;
 }
-
-.modal-content h2 {
-  margin: 0 0 16px 0;
-  font-size: 22px;
-  font-weight: 800;
-  text-align: center;
-  letter-spacing: 1px;
+.dialog-card h2 { margin: 0 0 16px 0; font-size: 22px; font-weight: 800; text-align: center; }
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
-
+.setting-label { font-size: 15px; font-weight: 600; }
+.setting-select {
+  background: #2f3542;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}
 .log-entries {
   overflow-y: auto;
   padding-right: 6px;
   margin-bottom: 18px;
 }
-
 .log-entry {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
   padding: 12px 14px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
-
 .log-entry.current {
   border: 1px solid #2ecc71;
   background: rgba(46, 204, 113, 0.1);
 }
-
 .log-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
-
-.log-header .tag {
-  font-weight: 800;
-  font-size: 14px;
-  color: #f1c40f;
-}
-
-.log-header .date {
-  font-size: 11px;
-  text-transform: uppercase;
-  color: #2ecc71;
-  font-weight: 700;
-}
-
+.log-header .tag { font-weight: 800; font-size: 14px; color: #f1c40f; }
+.log-header .date { font-size: 11px; text-transform: uppercase; color: #2ecc71; font-weight: 700; }
 .log-entry ul {
   margin: 0;
   padding-left: 18px;
@@ -101,8 +202,7 @@
   color: #d2dae2;
   line-height: 1.5;
 }
-
-#close-log-btn {
+.close-btn {
   background: #e74c3c;
   color: #fff;
   border: none;
@@ -111,12 +211,6 @@
   padding: 12px 0;
   border-radius: 10px;
   cursor: pointer;
+  margin-top: 14px;
 }
-
-#close-log-btn:active {
-  background: #c0392b;
-}
-
-.hidden {
-  display: none !important;
-}
+.hidden { display: none !important; }
