@@ -27,7 +27,7 @@ const d = 160;
 const aspect = window.innerWidth / window.innerHeight;
 const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 2000);
 
-// Camera offsets relative to the chicken
+// Camera offsets relative to the chicken position
 const cameraPresets = {
   classic: { x: 120, y: 160, z: 120 },
   high: { x: 60, y: 240, z: 80 },
@@ -55,7 +55,7 @@ const chicken = createChicken();
 chicken.position.set(0, 0, 0);
 scene.add(chicken);
 
-// Initial camera position looking directly at the chicken
+// Initial camera position centered on chicken
 camera.position.set(camOffset.x, camOffset.y, camOffset.z);
 camera.lookAt(0, 0, 0);
 
@@ -176,86 +176,4 @@ function animate(now) {
 
     if (t >= 1) {
       jump.isJumping = false;
-      chicken.position.set(jump.targetX, 0, jump.targetZ);
-      chicken.scale.set(1, 1, 1);
-    }
-  } else if (activeFloater && activeFloater.userData.speed) {
-    chicken.position.x += activeFloater.userData.speed;
-    currentX = chicken.position.x;
-    if (chicken.position.x > 180 || chicken.position.x < -180) {
-      resetRun();
-      return;
-    }
-  }
-
-  // Smoothly center camera directly on the chicken's current location
-  const targetCamZ = -currentLane * STEP_SIZE;
-  smoothCameraZ += (targetCamZ - smoothCameraZ) * 0.08;
-  smoothCameraX += (chicken.position.x - smoothCameraX) * 0.08;
-
-  camera.position.set(
-    smoothCameraX + camOffset.x,
-    camOffset.y,
-    smoothCameraZ + camOffset.z
-  );
-  camera.lookAt(smoothCameraX, 0, smoothCameraZ);
-
-  // Vehicle movement & collision
-  for (let i = 0; i < vehicles.length; i++) {
-    const v = vehicles[i];
-    v.position.x += v.userData.lane.speed;
-    if (v.position.x > 340) v.position.x = -340;
-    if (v.position.x < -340) v.position.x = 340;
-
-    if (
-      Math.abs(v.position.z - chicken.position.z) < 9 &&
-      Math.abs(v.position.x - chicken.position.x) < (v.userData.width / 2 + 5)
-    ) {
-      resetRun();
-      return;
-    }
-  }
-
-  // Floating platforms (Logs & Lily Pads)
-  let onFloater = false;
-  for (let i = 0; i < floaters.length; i++) {
-    const f = floaters[i];
-    if (f.userData.speed) {
-      f.position.x += f.userData.speed;
-      if (f.position.x > 340) f.position.x = -340;
-      if (f.position.x < -340) f.position.x = 340;
-    }
-
-    if (
-      !jump.isJumping &&
-      Math.abs(f.position.z - chicken.position.z) < 8 &&
-      Math.abs(f.position.x - chicken.position.x) < (f.userData.width / 2 + 4)
-    ) {
-      onFloater = true;
-      activeFloater = f;
-    }
-  }
-
-  // Water lane drowning check
-  if (!jump.isJumping) {
-    const lane = lanes[currentLane];
-    if (lane && lane.type === 'water' && !onFloater) {
-      resetRun();
-      return;
-    }
-  }
-
-  renderer.render(scene, camera);
-}
-requestAnimationFrame(animate);
-
-// Window resize
-window.addEventListener('resize', () => {
-  const a = window.innerWidth / window.innerHeight;
-  camera.left = -d * a;
-  camera.right = d * a;
-  camera.top = d;
-  camera.bottom = -d;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
+      chicken.position.set(jump.targetX
