@@ -18,16 +18,15 @@ const vehicles = [];
 const floaters = [];
 const obstacles = [];
 
-// Scene setup
+// Scene
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x90caf9);
 
-// Orthographic Camera (Fixed scale and framing)
+// Camera
 const d = 160;
 const aspect = window.innerWidth / window.innerHeight;
 const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 2000);
 
-// Camera offsets relative to the player
 const cameraPresets = {
   classic: { x: 120, y: 160, z: 120 },
   high: { x: 60, y: 240, z: 80 },
@@ -50,21 +49,20 @@ const dirLight = new THREE.DirectionalLight(0xffffff, 0.65);
 dirLight.position.set(100, 200, 80);
 scene.add(dirLight);
 
-// Player Chicken
+// Chicken Character
 const chicken = createChicken();
 chicken.position.set(0, 0, 0);
 scene.add(chicken);
 
-// Camera starts looking directly at (0, 0, 0)
 camera.position.set(camOffset.x, camOffset.y, camOffset.z);
 camera.lookAt(0, 0, 0);
 
-// Generate 40 initial lanes
+// Populate Lanes
 for (let i = 0; i < 40; i++) {
   lanes.push(createLane(i, STEP_SIZE, scene, vehicles, floaters, obstacles));
 }
 
-// Hop Animation State
+// Jump State
 const jump = {
   isJumping: false,
   startX: 0,
@@ -145,7 +143,6 @@ function resetRun() {
   camera.lookAt(0, 0, 0);
 }
 
-// Bind UI & Controls
 setupControls(triggerMove);
 setupUI({
   onStart: () => {
@@ -172,7 +169,6 @@ function animate(now) {
   requestAnimationFrame(animate);
   if (isPaused) return;
 
-  // Jump animation
   if (jump.isJumping) {
     const elapsed = now - jump.startTime;
     const t = Math.min(elapsed / jump.duration, 1);
@@ -198,7 +194,7 @@ function animate(now) {
     }
   }
 
-  // Smooth camera tracking centered directly on the chicken
+  // Linear tracking centered on the player
   const targetCamZ = -currentLane * STEP_SIZE;
   smoothCameraZ += (targetCamZ - smoothCameraZ) * 0.08;
   smoothCameraX += (chicken.position.x - smoothCameraX) * 0.08;
@@ -226,7 +222,7 @@ function animate(now) {
     }
   }
 
-  // Floating platforms (Logs & Lily Pads)
+  // Floating platforms
   let onFloater = false;
   for (let i = 0; i < floaters.length; i++) {
     const f = floaters[i];
@@ -246,7 +242,7 @@ function animate(now) {
     }
   }
 
-  // Water check
+  // Drowning check
   if (!jump.isJumping) {
     const lane = lanes[currentLane];
     if (lane && lane.type === 'water' && !onFloater) {
@@ -259,7 +255,7 @@ function animate(now) {
 }
 requestAnimationFrame(animate);
 
-// Window resize handler
+// Window resize
 window.addEventListener('resize', () => {
   const a = window.innerWidth / window.innerHeight;
   camera.left = -d * a;
