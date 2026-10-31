@@ -4,7 +4,6 @@ function createTree(x, z) {
   const THREE = window.THREE;
   const tree = new THREE.Group();
 
-  // Trunk
   const trunk = new THREE.Mesh(
     new THREE.BoxGeometry(6, 12, 6),
     new THREE.MeshLambertMaterial({ color: 0x5d4037 })
@@ -12,7 +11,6 @@ function createTree(x, z) {
   trunk.position.y = 6;
   tree.add(trunk);
 
-  // Foliage
   const leaves = new THREE.Mesh(
     new THREE.BoxGeometry(16, 18, 16),
     new THREE.MeshLambertMaterial({ color: 0x2e7d32 })
@@ -50,7 +48,7 @@ function spawnVehicle(lane, startX, scene, vehicles) {
   vehicle.position.set(startX, 0, lane.z);
   vehicle.userData = { lane, width, depth, type: 'vehicle' };
   scene.add(vehicle);
-  vehicles.push(vehicle);
+  if (vehicles) vehicles.push(vehicle);
 }
 
 function spawnLog(lane, startX, scene, floaters) {
@@ -66,7 +64,7 @@ function spawnLog(lane, startX, scene, floaters) {
   log.position.set(startX, 1, lane.z);
   log.userData = { lane, width, depth, type: 'log', speed: lane.speed };
   scene.add(log);
-  floaters.push(log);
+  if (floaters) floaters.push(log);
 }
 
 function spawnLilyPad(x, z, scene, floaters) {
@@ -78,10 +76,10 @@ function spawnLilyPad(x, z, scene, floaters) {
   pad.position.set(x, 0.5, z);
   pad.userData = { width: 16, depth: 16, type: 'lily', speed: 0 };
   scene.add(pad);
-  floaters.push(pad);
+  if (floaters) floaters.push(pad);
 }
 
-export function createLane(index, stepSize, scene, vehicles, floaters, obstacles) {
+export function createLane(index, stepSize, scene, vehicles = [], floaters = [], obstacles = []) {
   const THREE = window.THREE;
   const z = -index * stepSize;
 
@@ -114,11 +112,22 @@ export function createLane(index, stepSize, scene, vehicles, floaters, obstacles
   } else if (type === 'water') {
     laneData.speed = (Math.random() * 0.9 + 0.6) * (Math.random() < 0.5 ? 1 : -1);
     if (Math.random() < 0.3) {
-      // Lily pad lane (stationary platforms)
       for (let x = -100; x <= 100; x += 40) {
         if (Math.random() < 0.7) spawnLilyPad(x, z, scene, floaters);
       }
     } else {
-      // Flowing log lane
       spawnLog(laneData, -160, scene, floaters);
-      spawn
+      spawnLog(laneData, 80, scene, floaters);
+    }
+  } else if (type === 'grass' && index > 2) {
+    for (let x = -140; x <= 140; x += stepSize) {
+      if (Math.random() < 0.28) {
+        const tree = createTree(x, z);
+        scene.add(tree);
+        if (obstacles) obstacles.push({ x, z, radius: 8 });
+      }
+    }
+  }
+
+  return laneData;
+}
