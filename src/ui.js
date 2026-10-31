@@ -7,43 +7,42 @@ export function setupUI(handlers) {
   const logDialog = get('log-dialog');
   const controlsContainer = get('controls-container');
 
-  const addClick = (id, fn) => {
+  const addTap = (id, fn) => {
     const el = get(id);
     if (!el) return;
     el.addEventListener('click', fn);
-    el.addEventListener('touchstart', (e) => { e.preventDefault(); fn(); });
   };
 
-  addClick('start-btn', () => {
+  addTap('start-btn', () => {
     if (homeScreen) homeScreen.classList.add('hidden');
     handlers.onStart();
   });
 
-  addClick('log-btn', () => logDialog && logDialog.classList.remove('hidden'));
-  addClick('close-log-btn', () => logDialog && logDialog.classList.add('hidden'));
+  addTap('log-btn', () => logDialog && logDialog.classList.remove('hidden'));
+  addTap('close-log-btn', () => logDialog && logDialog.classList.add('hidden'));
 
   const openSettings = () => settingsDialog && settingsDialog.classList.remove('hidden');
-  addClick('settings-home-btn', openSettings);
-  addClick('settings-top-btn', openSettings);
-  addClick('settings-pause-btn', openSettings);
-  addClick('close-settings-btn', () => settingsDialog && settingsDialog.classList.add('hidden'));
+  addTap('settings-home-btn', openSettings);
+  addTap('settings-top-btn', openSettings);
+  addTap('settings-pause-btn', openSettings);
+  addTap('close-settings-btn', () => settingsDialog && settingsDialog.classList.add('hidden'));
 
-  addClick('pause-top-btn', () => {
+  addTap('pause-top-btn', () => {
     if (pauseScreen) pauseScreen.classList.remove('hidden');
     handlers.onPause();
   });
 
-  addClick('resume-btn', () => {
+  addTap('resume-btn', () => {
     if (pauseScreen) pauseScreen.classList.add('hidden');
     handlers.onResume();
   });
 
-  addClick('restart-btn', () => {
+  addTap('restart-btn', () => {
     if (pauseScreen) pauseScreen.classList.add('hidden');
     handlers.onRestart();
   });
 
-  // Dynamic orientation layout
+  // Dynamic layout check
   let layoutMode = 'auto';
   function updateLayout() {
     if (!controlsContainer) return;
