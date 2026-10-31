@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Crossy Road</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #222; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+    #controls {
+      position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+      display: grid; grid-template-columns: 60px 60px 60px; grid-gap: 10px; z-index: 10;
+    }
+    .btn {
+      width: 60px; height: 60px; background: rgba(255,255,255,0.7);
+      border: none; border-radius: 12px; font-size: 24px; font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <div></div><button class="btn" onclick="move('forward')">▲</button><div></div>
+    <button class="btn" onclick="move('left')">◀</button>
+    <button class="btn" onclick="move('backward')">▼</button>
+    <button class="btn" onclick="move('right')">▶</button>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xa0d7ff);
+    const camera = new THREE.OrthographicCamera(
+      window.innerWidth / -20, window.innerWidth / 20,
+      window.innerHeight / 20, window.innerHeight / -20, 1, 1000
+    );
+    camera.position.set(50, 50, 50);
+    camera.lookAt(0, 0, 0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(20, 40, 20);
+    scene.add(light);
+    scene.add(new THREE.AmbientLight(0x666666));
+
+    // Ground
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(100, 200),
+      new THREE.MeshLambertMaterial({ color: 0x90ee90 })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    scene.add(ground);
+
+    // Chicken player
+    const player = new THREE.Mesh(
+      new THREE.BoxGeometry(4, 4, 4),
+      new THREE.MeshLambertMaterial({ color: 0xffffff })
+    );
+    player.position.set(0, 2, 0);
+    scene.add(player);
+
+    function move(dir) {
+      if (dir === 'forward') player.position.z -= 4;
+      if (dir === 'backward') player.position.z += 4;
+      if (dir === 'left') player.position.x -= 4;
+      if (dir === 'right') player.position.x += 4;
+      camera.position.z = player.position.z + 50;
+      camera.position.x = player.position.x + 50;
+      camera.lookAt(player.position.x, 0, player.position.z);
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp' || e.key === 'w') move('forward');
+      if (e.key === 'ArrowDown' || e.key === 's') move('backward');
+      if (e.key === 'ArrowLeft' || e.key === 'a') move('left');
+      if (e.key === 'ArrowRight' || e.key === 'd') move('right');
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>
