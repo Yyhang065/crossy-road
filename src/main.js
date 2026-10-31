@@ -18,16 +18,16 @@ const vehicles = [];
 const floaters = [];
 const obstacles = [];
 
-// Scene
+// Scene setup
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x90caf9);
 
-// Orthographic Camera Setup
+// Orthographic Camera (Fixed scale and framing)
 const d = 160;
 const aspect = window.innerWidth / window.innerHeight;
 const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 2000);
 
-// Camera offsets relative to the chicken position
+// Camera offsets relative to the player
 const cameraPresets = {
   classic: { x: 120, y: 160, z: 120 },
   high: { x: 60, y: 240, z: 80 },
@@ -50,16 +50,16 @@ const dirLight = new THREE.DirectionalLight(0xffffff, 0.65);
 dirLight.position.set(100, 200, 80);
 scene.add(dirLight);
 
-// Chicken Character
+// Player Chicken
 const chicken = createChicken();
 chicken.position.set(0, 0, 0);
 scene.add(chicken);
 
-// Initial camera position centered on chicken
+// Camera starts looking directly at (0, 0, 0)
 camera.position.set(camOffset.x, camOffset.y, camOffset.z);
 camera.lookAt(0, 0, 0);
 
-// Populate 40 starter lanes with all parameters
+// Generate 40 initial lanes
 for (let i = 0; i < 40; i++) {
   lanes.push(createLane(i, STEP_SIZE, scene, vehicles, floaters, obstacles));
 }
@@ -148,16 +148,26 @@ function resetRun() {
 // Bind UI & Controls
 setupControls(triggerMove);
 setupUI({
-  onStart: () => { gameStarted = true; },
-  onPause: () => { isPaused = true; },
-  onResume: () => { isPaused = false; },
-  onRestart: () => { isPaused = false; resetRun(); },
+  onStart: () => {
+    gameStarted = true;
+    isPaused = false;
+  },
+  onPause: () => {
+    isPaused = true;
+  },
+  onResume: () => {
+    isPaused = false;
+  },
+  onRestart: () => {
+    isPaused = false;
+    resetRun();
+  },
   onCameraChange: (mode) => {
     if (cameraPresets[mode]) camOffset = { ...cameraPresets[mode] };
   }
 });
 
-// Main Loop
+// Render Loop
 function animate(now) {
   requestAnimationFrame(animate);
   if (isPaused) return;
@@ -188,7 +198,7 @@ function animate(now) {
     }
   }
 
-  // Smoothly center camera directly on the chicken's current location
+  // Smooth camera tracking centered directly on the chicken
   const targetCamZ = -currentLane * STEP_SIZE;
   smoothCameraZ += (targetCamZ - smoothCameraZ) * 0.08;
   smoothCameraX += (chicken.position.x - smoothCameraX) * 0.08;
@@ -198,4 +208,64 @@ function animate(now) {
     camOffset.y,
     smoothCameraZ + camOffset.z
   );
-  camera.lookAt(smoothCameraX, 0
+  camera.lookAt(smoothCameraX, 0, smoothCameraZ);
+
+  // Vehicles
+  for (let i = 0; i < vehicles.length; i++) {
+    const v = vehicles[i];
+    v.position.x += v.userData.lane.speed;
+    if (v.position.x > 340) v.position.x = -340;
+    if (v.position.x < -340) v.position.x = 340;
+
+    if (
+      Math.abs(v.position.z - chicken.position.z) < 9 &&
+      Math.abs(v.position.x - chicken.position.x) < (v.userData.width / 2 + 5)
+    ) {
+      resetRun();
+      return;
+    }
+  }
+
+  // Floating platforms (Logs & Lily Pads)
+  let onFloater = false;
+  for (let i = 0; i < floaters.length; i++) {
+    const f = floaters[i];
+    if (f.userData.speed) {
+      f.position.x += f.userData.speed;
+      if (f.position.x > 340) f.position.x = -340;
+      if (f.position.x < -340) f.position.x = 340;
+    }
+
+    if (
+      !jump.isJumping &&
+      Math.abs(f.position.z - chicken.position.z) < 8 &&
+      Math.abs(f.position.x - chicken.position.x) < (f.userData.width / 2 + 4)
+    ) {
+      onFloater = true;
+      activeFloater = f;
+    }
+  }
+
+  // Water check
+  if (!jump.isJumping) {
+    const lane = lanes[currentLane];
+    if (lane && lane.type === 'water' && !onFloater) {
+      resetRun();
+      return;
+    }
+  }
+
+  renderer.render(scene, camera);
+}
+requestAnimationFrame(animate);
+
+// Window resize handler
+window.addEventListener('resize', () => {
+  const a = window.innerWidth / window.innerHeight;
+  camera.left = -d * a;
+  camera.right = d * a;
+  camera.top = d;
+  camera.bottom = -d;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
