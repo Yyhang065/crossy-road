@@ -3,8 +3,9 @@ export function setupUI(handlers) {
   const pauseScreen = document.getElementById('pause-screen');
   const settingsDialog = document.getElementById('settings-dialog');
   const logDialog = document.getElementById('log-dialog');
+  const controlsContainer = document.getElementById('controls-container');
 
-  // Home controls
+  // Start & Log
   document.getElementById('start-btn').addEventListener('click', () => {
     homeScreen.classList.add('hidden');
     handlers.onStart();
@@ -44,12 +45,39 @@ export function setupUI(handlers) {
     handlers.onRestart();
   });
 
-  // Dropdown adjustments
+  // Layout Orientation and Selection
+  let currentLayoutSetting = 'auto';
+
+  function applyLayout() {
+    if (currentLayoutSetting === 'auto') {
+      const isPortrait = window.innerHeight > window.innerWidth;
+      if (isPortrait) {
+        controlsContainer.className = 'layout-cluster';
+      } else {
+        controlsContainer.className = 'layout-split';
+      }
+    } else if (currentLayoutSetting === 'split') {
+      controlsContainer.className = 'layout-split';
+    } else if (currentLayoutSetting === 'cluster') {
+      controlsContainer.className = 'layout-cluster';
+    }
+  }
+
+  document.getElementById('layout-select').addEventListener('change', (e) => {
+    currentLayoutSetting = e.target.value;
+    applyLayout();
+  });
+
+  window.addEventListener('resize', applyLayout);
+  window.addEventListener('orientationchange', applyLayout);
+  applyLayout();
+
+  // Settings Options
   document.getElementById('camera-select').addEventListener('change', (e) => {
     handlers.onCameraChange(e.target.value);
   });
 
   document.getElementById('opacity-select').addEventListener('change', (e) => {
-    document.getElementById('controls').style.opacity = e.target.value;
+    controlsContainer.style.opacity = e.target.value;
   });
 }
