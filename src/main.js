@@ -176,4 +176,26 @@ function animate(now) {
 
     if (t >= 1) {
       jump.isJumping = false;
-      chicken.position.set(jump.targetX
+      chicken.position.set(jump.targetX, 0, jump.targetZ);
+      chicken.scale.set(1, 1, 1);
+    }
+  } else if (activeFloater && activeFloater.userData.speed) {
+    chicken.position.x += activeFloater.userData.speed;
+    currentX = chicken.position.x;
+    if (chicken.position.x > 180 || chicken.position.x < -180) {
+      resetRun();
+      return;
+    }
+  }
+
+  // Smoothly center camera directly on the chicken's current location
+  const targetCamZ = -currentLane * STEP_SIZE;
+  smoothCameraZ += (targetCamZ - smoothCameraZ) * 0.08;
+  smoothCameraX += (chicken.position.x - smoothCameraX) * 0.08;
+
+  camera.position.set(
+    smoothCameraX + camOffset.x,
+    camOffset.y,
+    smoothCameraZ + camOffset.z
+  );
+  camera.lookAt(smoothCameraX, 0
