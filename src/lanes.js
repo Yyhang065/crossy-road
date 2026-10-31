@@ -48,7 +48,7 @@ function spawnVehicle(lane, startX, scene, vehicles) {
   vehicle.position.set(startX, 0, lane.z);
   vehicle.userData = { lane, width, depth, type: 'vehicle' };
   scene.add(vehicle);
-  if (vehicles) vehicles.push(vehicle);
+  if (Array.isArray(vehicles)) vehicles.push(vehicle);
 }
 
 function spawnLog(lane, startX, scene, floaters) {
@@ -64,7 +64,7 @@ function spawnLog(lane, startX, scene, floaters) {
   log.position.set(startX, 1, lane.z);
   log.userData = { lane, width, depth, type: 'log', speed: lane.speed };
   scene.add(log);
-  if (floaters) floaters.push(log);
+  if (Array.isArray(floaters)) floaters.push(log);
 }
 
 function spawnLilyPad(x, z, scene, floaters) {
@@ -76,7 +76,7 @@ function spawnLilyPad(x, z, scene, floaters) {
   pad.position.set(x, 0.5, z);
   pad.userData = { width: 16, depth: 16, type: 'lily', speed: 0 };
   scene.add(pad);
-  if (floaters) floaters.push(pad);
+  if (Array.isArray(floaters)) floaters.push(pad);
 }
 
 export function createLane(index, stepSize, scene, vehicles = [], floaters = [], obstacles = []) {
@@ -124,7 +124,7 @@ export function createLane(index, stepSize, scene, vehicles = [], floaters = [],
       if (Math.random() < 0.28) {
         const tree = createTree(x, z);
         scene.add(tree);
-        if (obstacles) obstacles.push({ x, z, radius: 8 });
+        if (Array.isArray(obstacles)) obstacles.push({ x, z, radius: 8 });
       }
     }
   }
