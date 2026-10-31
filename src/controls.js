@@ -25,13 +25,25 @@ export function setupControls(onMove) {
     }
   });
 
-  // Touch & Click bindings for directional buttons
+  // Touch and Pointer bindings
   const bindButton = (id, direction) => {
     const btn = document.getElementById(id);
     if (!btn) return;
 
-    btn.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
+    let handled = false;
+
+    btn.addEventListener('touchstart', (e) => {
+      e.stopPropagation();
+      handled = true;
+      onMove(direction);
+    }, { passive: true });
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (handled) {
+        handled = false;
+        return;
+      }
       onMove(direction);
     });
   };
