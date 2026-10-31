@@ -1,11 +1,16 @@
-export function setupUI(handlers) {
+export async function setupUI(handlers) {
+  // Inject menus.html into the page automatically
+  const res = await fetch('./menus.html');
+  const html = await res.text();
+  document.getElementById('ui-root').innerHTML = html;
+
   const homeScreen = document.getElementById('home-screen');
   const pauseScreen = document.getElementById('pause-screen');
   const settingsDialog = document.getElementById('settings-dialog');
   const logDialog = document.getElementById('log-dialog');
   const controlsContainer = document.getElementById('controls-container');
 
-  // Start & Log
+  // Start & Log Buttons
   document.getElementById('start-btn').addEventListener('click', () => {
     homeScreen.classList.add('hidden');
     handlers.onStart();
@@ -19,7 +24,7 @@ export function setupUI(handlers) {
     logDialog.classList.add('hidden');
   });
 
-  // Settings
+  // Settings Buttons
   const openSettings = () => settingsDialog.classList.remove('hidden');
   document.getElementById('settings-home-btn').addEventListener('click', openSettings);
   document.getElementById('settings-top-btn').addEventListener('click', openSettings);
@@ -29,7 +34,7 @@ export function setupUI(handlers) {
     settingsDialog.classList.add('hidden');
   });
 
-  // Pause
+  // Pause Controls
   document.getElementById('pause-top-btn').addEventListener('click', () => {
     pauseScreen.classList.remove('hidden');
     handlers.onPause();
@@ -45,17 +50,13 @@ export function setupUI(handlers) {
     handlers.onRestart();
   });
 
-  // Layout Orientation and Selection
+  // Layout Orientation
   let currentLayoutSetting = 'auto';
 
   function applyLayout() {
     if (currentLayoutSetting === 'auto') {
       const isPortrait = window.innerHeight > window.innerWidth;
-      if (isPortrait) {
-        controlsContainer.className = 'layout-cluster';
-      } else {
-        controlsContainer.className = 'layout-split';
-      }
+      controlsContainer.className = isPortrait ? 'layout-cluster' : 'layout-split';
     } else if (currentLayoutSetting === 'split') {
       controlsContainer.className = 'layout-split';
     } else if (currentLayoutSetting === 'cluster') {
@@ -72,7 +73,7 @@ export function setupUI(handlers) {
   window.addEventListener('orientationchange', applyLayout);
   applyLayout();
 
-  // Settings Options
+  // Settings dropdowns
   document.getElementById('camera-select').addEventListener('change', (e) => {
     handlers.onCameraChange(e.target.value);
   });
