@@ -1,9 +1,4 @@
-export async function setupUI(handlers) {
-  // Inject menus.html into the page automatically
-  const res = await fetch('./menus.html');
-  const html = await res.text();
-  document.getElementById('ui-root').innerHTML = html;
-
+export function setupUI(handlers) {
   const homeScreen = document.getElementById('home-screen');
   const pauseScreen = document.getElementById('pause-screen');
   const settingsDialog = document.getElementById('settings-dialog');
