@@ -1,5 +1,4 @@
 export function setupControls(onMove) {
-  // Keyboard
   window.addEventListener('keydown', (e) => {
     switch (e.key) {
       case 'ArrowUp':
@@ -25,25 +24,12 @@ export function setupControls(onMove) {
     }
   });
 
-  // Touch and Pointer bindings
   const bindButton = (id, direction) => {
     const btn = document.getElementById(id);
     if (!btn) return;
 
-    let handled = false;
-
-    btn.addEventListener('touchstart', (e) => {
-      e.stopPropagation();
-      handled = true;
-      onMove(direction);
-    }, { passive: true });
-
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (handled) {
-        handled = false;
-        return;
-      }
+    btn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
       onMove(direction);
     });
   };
