@@ -18,50 +18,49 @@ const vehicles = [];
 const floaters = [];
 const obstacles = [];
 
-// Scene & Orthographic Camera
+// Scene
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x90caf9);
 
+// Orthographic Camera
 const d = 160;
 const aspect = window.innerWidth / window.innerHeight;
 const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 2000);
 
-camera.rotation.order = 'YXZ';
-camera.rotation.y = -Math.PI / 4;
-camera.rotation.x = Math.atan(-1 / Math.sqrt(2));
-
 const cameraPresets = {
-  classic: { x: 220, y: 260, z: 220 },
-  high: { x: 140, y: 340, z: 180 },
-  close: { x: 150, y: 190, z: 150 }
+  classic: { x: 200, y: 240, z: 200 },
+  high: { x: 120, y: 320, z: 160 },
+  close: { x: 140, y: 170, z: 140 }
 };
 let camOffset = { ...cameraPresets.classic };
 camera.position.set(camOffset.x, camOffset.y, camOffset.z);
+camera.lookAt(0, 0, 0);
 
 // Renderer
-const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 const container = document.getElementById('canvas-container') || document.body;
+container.innerHTML = '';
 container.appendChild(renderer.domElement);
 
-// Lights
-scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+// Lighting
+scene.add(new THREE.AmbientLight(0xffffff, 0.8));
 const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
-dirLight.position.set(120, 220, 80);
+dirLight.position.set(100, 200, 80);
 scene.add(dirLight);
 
-// Chicken
+// Chicken Model
 const chicken = createChicken();
 scene.add(chicken);
 
-// Populate start map with all 6 arguments
+// Starter Lanes
 for (let i = 0; i < 40; i++) {
   lanes.push(createLane(i, STEP_SIZE, scene, vehicles, floaters, obstacles));
 }
 
-// Hop Animation State
+// Jump State
 const jump = {
   isJumping: false,
   startX: 0,
@@ -118,8 +117,8 @@ function triggerMove(dir) {
   if (currentLane > maxLaneReached) {
     maxLaneReached = currentLane;
     score = maxLaneReached;
-    const scoreEl = document.getElementById('score-board');
-    if (scoreEl) scoreEl.innerText = score;
+    const scoreBoard = document.getElementById('score-board');
+    if (scoreBoard) scoreBoard.innerText = score;
     lanes.push(createLane(lanes.length, STEP_SIZE, scene, vehicles, floaters, obstacles));
   }
 }
@@ -132,13 +131,14 @@ function resetRun() {
   activeFloater = null;
   maxLaneReached = 0;
   score = 0;
-  const scoreEl = document.getElementById('score-board');
-  if (scoreEl) scoreEl.innerText = score;
+  const scoreBoard = document.getElementById('score-board');
+  if (scoreBoard) scoreBoard.innerText = score;
   smoothCameraZ = 0;
   camera.position.set(camOffset.x, camOffset.y, camOffset.z);
+  camera.lookAt(0, 0, 0);
 }
 
-// Connect Controls & UI
+// Bind UI
 setupControls(triggerMove);
 setupUI({
   onStart: () => { gameStarted = true; },
@@ -150,7 +150,7 @@ setupUI({
   }
 });
 
-// Main Loop
+// Render Loop
 function animate(now) {
   requestAnimationFrame(animate);
   if (isPaused) return;
@@ -180,10 +180,13 @@ function animate(now) {
     }
   }
 
+  // Camera ground tracking
   const targetCamZ = -currentLane * STEP_SIZE;
   smoothCameraZ += (targetCamZ - smoothCameraZ) * 0.08;
   camera.position.set(camOffset.x, camOffset.y, smoothCameraZ + camOffset.z);
+  camera.lookAt(0, 0, smoothCameraZ);
 
+  // Cars
   for (let i = 0; i < vehicles.length; i++) {
     const v = vehicles[i];
     v.position.x += v.userData.lane.speed;
@@ -199,6 +202,7 @@ function animate(now) {
     }
   }
 
+  // Logs & Pads
   let onFloater = false;
   for (let i = 0; i < floaters.length; i++) {
     const f = floaters[i];
@@ -218,6 +222,7 @@ function animate(now) {
     }
   }
 
+  // Water check
   if (!jump.isJumping) {
     const lane = lanes[currentLane];
     if (lane && lane.type === 'water' && !onFloater) {
@@ -230,6 +235,7 @@ function animate(now) {
 }
 requestAnimationFrame(animate);
 
+// Window resize
 window.addEventListener('resize', () => {
   const a = window.innerWidth / window.innerHeight;
   camera.left = -d * a;
