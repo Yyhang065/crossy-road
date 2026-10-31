@@ -1,79 +1,81 @@
 export function setupUI(handlers) {
-  const homeScreen = document.getElementById('home-screen');
-  const pauseScreen = document.getElementById('pause-screen');
-  const settingsDialog = document.getElementById('settings-dialog');
-  const logDialog = document.getElementById('log-dialog');
-  const controlsContainer = document.getElementById('controls-container');
+  const get = (id) => document.getElementById(id);
 
-  // Start & Log Buttons
-  document.getElementById('start-btn').addEventListener('click', () => {
-    homeScreen.classList.add('hidden');
+  const homeScreen = get('home-screen');
+  const pauseScreen = get('pause-screen');
+  const settingsDialog = get('settings-dialog');
+  const logDialog = get('log-dialog');
+  const controlsContainer = get('controls-container');
+
+  const addClick = (id, fn) => {
+    const el = get(id);
+    if (!el) return;
+    el.addEventListener('click', fn);
+    el.addEventListener('touchstart', (e) => { e.preventDefault(); fn(); });
+  };
+
+  addClick('start-btn', () => {
+    if (homeScreen) homeScreen.classList.add('hidden');
     handlers.onStart();
   });
 
-  document.getElementById('log-btn').addEventListener('click', () => {
-    logDialog.classList.remove('hidden');
-  });
+  addClick('log-btn', () => logDialog && logDialog.classList.remove('hidden'));
+  addClick('close-log-btn', () => logDialog && logDialog.classList.add('hidden'));
 
-  document.getElementById('close-log-btn').addEventListener('click', () => {
-    logDialog.classList.add('hidden');
-  });
+  const openSettings = () => settingsDialog && settingsDialog.classList.remove('hidden');
+  addClick('settings-home-btn', openSettings);
+  addClick('settings-top-btn', openSettings);
+  addClick('settings-pause-btn', openSettings);
+  addClick('close-settings-btn', () => settingsDialog && settingsDialog.classList.add('hidden'));
 
-  // Settings Buttons
-  const openSettings = () => settingsDialog.classList.remove('hidden');
-  document.getElementById('settings-home-btn').addEventListener('click', openSettings);
-  document.getElementById('settings-top-btn').addEventListener('click', openSettings);
-  document.getElementById('settings-pause-btn').addEventListener('click', openSettings);
-
-  document.getElementById('close-settings-btn').addEventListener('click', () => {
-    settingsDialog.classList.add('hidden');
-  });
-
-  // Pause Controls
-  document.getElementById('pause-top-btn').addEventListener('click', () => {
-    pauseScreen.classList.remove('hidden');
+  addClick('pause-top-btn', () => {
+    if (pauseScreen) pauseScreen.classList.remove('hidden');
     handlers.onPause();
   });
 
-  document.getElementById('resume-btn').addEventListener('click', () => {
-    pauseScreen.classList.add('hidden');
+  addClick('resume-btn', () => {
+    if (pauseScreen) pauseScreen.classList.add('hidden');
     handlers.onResume();
   });
 
-  document.getElementById('restart-btn').addEventListener('click', () => {
-    pauseScreen.classList.add('hidden');
+  addClick('restart-btn', () => {
+    if (pauseScreen) pauseScreen.classList.add('hidden');
     handlers.onRestart();
   });
 
-  // Layout Orientation
-  let currentLayoutSetting = 'auto';
-
-  function applyLayout() {
-    if (currentLayoutSetting === 'auto') {
+  // Dynamic orientation layout
+  let layoutMode = 'auto';
+  function updateLayout() {
+    if (!controlsContainer) return;
+    if (layoutMode === 'auto') {
       const isPortrait = window.innerHeight > window.innerWidth;
       controlsContainer.className = isPortrait ? 'layout-cluster' : 'layout-split';
-    } else if (currentLayoutSetting === 'split') {
-      controlsContainer.className = 'layout-split';
-    } else if (currentLayoutSetting === 'cluster') {
-      controlsContainer.className = 'layout-cluster';
+    } else {
+      controlsContainer.className = layoutMode === 'cluster' ? 'layout-cluster' : 'layout-split';
     }
   }
 
-  document.getElementById('layout-select').addEventListener('change', (e) => {
-    currentLayoutSetting = e.target.value;
-    applyLayout();
-  });
+  const layoutSelect = get('layout-select');
+  if (layoutSelect) {
+    layoutSelect.addEventListener('change', (e) => {
+      layoutMode = e.target.value;
+      updateLayout();
+    });
+  }
 
-  window.addEventListener('resize', applyLayout);
-  window.addEventListener('orientationchange', applyLayout);
-  applyLayout();
+  window.addEventListener('resize', updateLayout);
+  window.addEventListener('orientationchange', updateLayout);
+  updateLayout();
 
-  // Settings dropdowns
-  document.getElementById('camera-select').addEventListener('change', (e) => {
-    handlers.onCameraChange(e.target.value);
-  });
+  const camSelect = get('camera-select');
+  if (camSelect) {
+    camSelect.addEventListener('change', (e) => handlers.onCameraChange(e.target.value));
+  }
 
-  document.getElementById('opacity-select').addEventListener('change', (e) => {
-    controlsContainer.style.opacity = e.target.value;
-  });
+  const opSelect = get('opacity-select');
+  if (opSelect) {
+    opSelect.addEventListener('change', (e) => {
+      if (controlsContainer) controlsContainer.style.opacity = e.target.value;
+    });
+  }
 }
