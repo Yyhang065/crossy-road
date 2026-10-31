@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
   <title>Crossy Road 3D - v1.1.0</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="./style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
@@ -47,8 +47,8 @@
         <span class="setting-label">Control Layout</span>
         <select id="layout-select" class="setting-select">
           <option value="auto" selected>Auto (Orientation)</option>
-          <option value="split">Split Hands (L: ↑↓ / R: ←→)</option>
-          <option value="cluster">Compact D-Pad (Bottom-Right)</option>
+          <option value="split">Split (L: ↑↓ / R: ←→)</option>
+          <option value="cluster">Compact D-Pad (Right)</option>
         </select>
       </div>
       <div class="setting-row">
@@ -82,11 +82,11 @@
             <span class="date">Latest</span>
           </div>
           <ul>
-            <li>Fixed camera shaking: locked isometric orientation matrix.</li>
-            <li>Added Water Lanes with flowing logs & lily pads.</li>
-            <li>Added Trees on grass lanes that block the chicken.</li>
-            <li>Introduced Long Trucks alongside standard cars.</li>
-            <li>Added drowning mechanics when landing on unfloated water.</li>
+            <li>Fixed black screen & startup crashes.</li>
+            <li>Shake-free orthographic camera tracking.</li>
+            <li>Water lanes with floating logs & stationary lily pads.</li>
+            <li>Trees blocking movement on grass lanes.</li>
+            <li>Trucks added alongside standard cars.</li>
           </ul>
         </div>
       </div>
@@ -106,6 +106,6 @@
     </div>
   </div>
 
-  <script type="module" src="src/main.js"></script>
+  <script type="module" src="./src/main.js"></script>
 </body>
 </html>
