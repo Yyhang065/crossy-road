@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-  <title>Crossy Road 3D - v1.0.3</title>
+  <title>Crossy Road 3D</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -18,112 +18,15 @@
 
   <div id="canvas-container"></div>
 
-  <!-- Start Screen -->
-  <div id="home-screen" class="overlay-screen">
-    <div class="title">CROSSY ROAD</div>
-    <div class="version-badge">v1.1.0</div>
-    <div class="btn-group">
-      <button class="menu-btn" id="start-btn">TAP TO PLAY</button>
-      <button class="menu-btn secondary-btn" id="log-btn">UPDATE LOG</button>
-      <button class="menu-btn secondary-btn" id="settings-home-btn">SETTINGS</button>
-    </div>
-  </div>
+  <!-- All menus, modals & changelogs get injected here dynamically -->
+  <div id="ui-root"></div>
 
-  <!-- Pause Screen -->
-  <div id="pause-screen" class="overlay-screen hidden">
-    <div class="title">PAUSED</div>
-    <div class="btn-group" style="margin-top: 16px;">
-      <button class="menu-btn" id="resume-btn">RESUME</button>
-      <button class="menu-btn secondary-btn" id="restart-btn">RESTART RUN</button>
-      <button class="menu-btn secondary-btn" id="settings-pause-btn">SETTINGS</button>
-    </div>
-  </div>
-
-  <!-- Settings Dialog -->
-  <div id="settings-dialog" class="overlay-screen hidden">
-    <div class="dialog-card">
-      <h2>Game Settings</h2>
-
-      <div class="setting-row">
-        <span class="setting-label">Control Layout</span>
-        <select id="layout-select" class="setting-select">
-          <option value="auto" selected>Auto (Orientation)</option>
-          <option value="split">Split Hands (L: ↑↓ / R: ←→)</option>
-          <option value="cluster">Compact D-Pad (Bottom-Right)</option>
-        </select>
-      </div>
-
-      <div class="setting-row">
-        <span class="setting-label">Camera Angle</span>
-        <select id="camera-select" class="setting-select">
-          <option value="classic" selected>Classic Isometric</option>
-          <option value="high">High Overhead</option>
-          <option value="close">Close Follow</option>
-        </select>
-      </div>
-
-      <div class="setting-row">
-        <span class="setting-label">D-Pad Opacity</span>
-        <select id="opacity-select" class="setting-select">
-          <option value="0.9" selected>Normal (90%)</option>
-          <option value="0.5">Subtle (50%)</option>
-          <option value="0.2">Minimal (20%)</option>
-        </select>
-      </div>
-
-      <button class="close-btn" id="close-settings-btn">DONE</button>
-    </div>
-  </div>
-
-  <!-- Update Log Dialog -->
-  <div id="log-dialog" class="overlay-screen hidden">
-    <div class="dialog-card">
-      <h2>Patch Notes</h2>
-      <div class="log-entries">
-        <div class="log-entry current">
-          <div class="log-header">
-            <span class="tag">v1.0.3</span>
-            <span class="date">Latest</span>
-          </div>
-          <ul>
-            <li>Removed screen shake: stabilized camera tracking.</li>
-            <li>Dynamic split controls (Up/Down on left, Left/Right on right in landscape).</li>
-            <li>Automatic portrait single-thumb bottom-right D-pad.</li>
-            <li>Settings toggle for Control Layout mode.</li>
-          </ul>
-        </div>
-        <div class="log-entry">
-          <div class="log-header"><span class="tag">v1.0.2</span></div>
-          <ul>
-            <li>Hop jump physics, pause screen, and settings.</li>
-          </ul>
-        </div>
-        <div class="log-entry">
-          <div class="log-header"><span class="tag">v1.0.1</span></div>
-          <ul>
-            <li>Start menu screen & changelog.</li>
-          </ul>
-        </div>
-        <div class="log-entry">
-          <div class="log-header"><span class="tag">v1.0.0</span></div>
-          <ul>
-            <li>Initial 3D voxel chicken & endless procedural road.</li>
-          </ul>
-        </div>
-      </div>
-      <button class="close-btn" id="close-log-btn">CLOSE</button>
-    </div>
-  </div>
-
-  <!-- Dynamic Control Overlay Container -->
+  <!-- Controls Container -->
   <div id="controls-container" class="layout-split">
-    <!-- Left Hand: Forward / Backward -->
     <div class="control-group group-vertical">
       <button class="btn btn-tall" id="btn-up">▲</button>
       <button class="btn btn-tall" id="btn-down">▼</button>
     </div>
-
-    <!-- Right Hand: Left / Right -->
     <div class="control-group group-horizontal">
       <button class="btn btn-wide" id="btn-left">◀</button>
       <button class="btn btn-wide" id="btn-right">▶</button>
