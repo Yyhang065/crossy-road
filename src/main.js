@@ -28,9 +28,9 @@ const aspect = window.innerWidth / window.innerHeight;
 const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 2000);
 
 const cameraPresets = {
-  classic: { x: 200, y: 240, z: 200 },
-  high: { x: 120, y: 320, z: 160 },
-  close: { x: 140, y: 170, z: 140 }
+  classic: { x: 220, y: 260, z: 220 },
+  high: { x: 140, y: 340, z: 180 },
+  close: { x: 150, y: 190, z: 150 }
 };
 let camOffset = { ...cameraPresets.classic };
 camera.position.set(camOffset.x, camOffset.y, camOffset.z);
@@ -46,21 +46,22 @@ container.innerHTML = '';
 container.appendChild(renderer.domElement);
 
 // Lighting
-scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
-dirLight.position.set(100, 200, 80);
+scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.65);
+dirLight.position.set(120, 220, 80);
 scene.add(dirLight);
 
-// Chicken Model
+// Chicken Character
 const chicken = createChicken();
+chicken.position.set(0, 0, 0);
 scene.add(chicken);
 
-// Starter Lanes
+// Populate 40 starter lanes with all parameters
 for (let i = 0; i < 40; i++) {
   lanes.push(createLane(i, STEP_SIZE, scene, vehicles, floaters, obstacles));
 }
 
-// Jump State
+// Hop Animation State
 const jump = {
   isJumping: false,
   startX: 0,
@@ -127,6 +128,7 @@ function resetRun() {
   currentLane = 0;
   currentX = 0;
   chicken.position.set(0, 0, 0);
+  chicken.rotation.y = 0;
   jump.isJumping = false;
   activeFloater = null;
   maxLaneReached = 0;
@@ -138,7 +140,7 @@ function resetRun() {
   camera.lookAt(0, 0, 0);
 }
 
-// Bind UI
+// Bind UI & Controls
 setupControls(triggerMove);
 setupUI({
   onStart: () => { gameStarted = true; },
@@ -155,6 +157,7 @@ function animate(now) {
   requestAnimationFrame(animate);
   if (isPaused) return;
 
+  // Jump animation
   if (jump.isJumping) {
     const elapsed = now - jump.startTime;
     const t = Math.min(elapsed / jump.duration, 1);
@@ -180,13 +183,13 @@ function animate(now) {
     }
   }
 
-  // Camera ground tracking
+  // Smooth camera tracking
   const targetCamZ = -currentLane * STEP_SIZE;
   smoothCameraZ += (targetCamZ - smoothCameraZ) * 0.08;
   camera.position.set(camOffset.x, camOffset.y, smoothCameraZ + camOffset.z);
   camera.lookAt(0, 0, smoothCameraZ);
 
-  // Cars
+  // Vehicle motion & collision
   for (let i = 0; i < vehicles.length; i++) {
     const v = vehicles[i];
     v.position.x += v.userData.lane.speed;
@@ -202,7 +205,7 @@ function animate(now) {
     }
   }
 
-  // Logs & Pads
+  // Floating logs and lily pads
   let onFloater = false;
   for (let i = 0; i < floaters.length; i++) {
     const f = floaters[i];
