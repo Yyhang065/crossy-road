@@ -27,14 +27,13 @@ const d = 160;
 const aspect = window.innerWidth / window.innerHeight;
 const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 2000);
 
+// Camera offsets relative to the chicken
 const cameraPresets = {
-  classic: { x: 180, y: 220, z: 180 },
-  high: { x: 100, y: 300, z: 140 },
-  close: { x: 120, y: 160, z: 120 }
+  classic: { x: 120, y: 160, z: 120 },
+  high: { x: 60, y: 240, z: 80 },
+  close: { x: 80, y: 110, z: 80 }
 };
 let camOffset = { ...cameraPresets.classic };
-camera.position.set(camOffset.x, camOffset.y, camOffset.z);
-camera.lookAt(0, 0, 0);
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
@@ -48,13 +47,17 @@ container.appendChild(renderer.domElement);
 // Lighting
 scene.add(new THREE.AmbientLight(0xffffff, 0.85));
 const dirLight = new THREE.DirectionalLight(0xffffff, 0.65);
-dirLight.position.set(120, 220, 80);
+dirLight.position.set(100, 200, 80);
 scene.add(dirLight);
 
 // Chicken Character
 const chicken = createChicken();
 chicken.position.set(0, 0, 0);
 scene.add(chicken);
+
+// Initial camera position looking directly at the chicken
+camera.position.set(camOffset.x, camOffset.y, camOffset.z);
+camera.lookAt(0, 0, 0);
 
 // Populate 40 starter lanes with all parameters
 for (let i = 0; i < 40; i++) {
@@ -73,6 +76,7 @@ const jump = {
 };
 
 let smoothCameraZ = 0;
+let smoothCameraX = 0;
 let activeFloater = null;
 
 function isBlocked(x, z) {
@@ -136,6 +140,7 @@ function resetRun() {
   const scoreBoard = document.getElementById('score-board');
   if (scoreBoard) scoreBoard.innerText = score;
   smoothCameraZ = 0;
+  smoothCameraX = 0;
   camera.position.set(camOffset.x, camOffset.y, camOffset.z);
   camera.lookAt(0, 0, 0);
 }
@@ -152,7 +157,7 @@ setupUI({
   }
 });
 
-// Main Game Loop
+// Main Loop
 function animate(now) {
   requestAnimationFrame(animate);
   if (isPaused) return;
@@ -183,17 +188,19 @@ function animate(now) {
     }
   }
 
-  // Camera smoothly tracks directly on the chicken's lane progress
+  // Smoothly center camera directly on the chicken's current location
   const targetCamZ = -currentLane * STEP_SIZE;
   smoothCameraZ += (targetCamZ - smoothCameraZ) * 0.08;
+  smoothCameraX += (chicken.position.x - smoothCameraX) * 0.08;
+
   camera.position.set(
-    chicken.position.x + camOffset.x,
+    smoothCameraX + camOffset.x,
     camOffset.y,
     smoothCameraZ + camOffset.z
   );
-  camera.lookAt(chicken.position.x, 0, smoothCameraZ);
+  camera.lookAt(smoothCameraX, 0, smoothCameraZ);
 
-  // Moving Vehicles
+  // Vehicle movement & collision
   for (let i = 0; i < vehicles.length; i++) {
     const v = vehicles[i];
     v.position.x += v.userData.lane.speed;
@@ -209,7 +216,7 @@ function animate(now) {
     }
   }
 
-  // Floating Platforms (Logs & Lily Pads)
+  // Floating platforms (Logs & Lily Pads)
   let onFloater = false;
   for (let i = 0; i < floaters.length; i++) {
     const f = floaters[i];
@@ -229,7 +236,7 @@ function animate(now) {
     }
   }
 
-  // Water check
+  // Water lane drowning check
   if (!jump.isJumping) {
     const lane = lanes[currentLane];
     if (lane && lane.type === 'water' && !onFloater) {
@@ -242,7 +249,7 @@ function animate(now) {
 }
 requestAnimationFrame(animate);
 
-// Window resize handler
+// Window resize
 window.addEventListener('resize', () => {
   const a = window.innerWidth / window.innerHeight;
   camera.left = -d * a;
