@@ -58,9 +58,12 @@ const jump = {
   startZ: 0,
   targetX: 0,
   targetZ: 0,
-  duration: 170,
+  duration: 160,
   startTime: 0
 };
+
+// Smooth Camera Follow Variable (Stabilized)
+let smoothCameraZ = 0;
 
 function triggerMove(dir) {
   if (!gameStarted || isPaused || jump.isJumping) return;
@@ -105,6 +108,7 @@ function resetRun() {
   maxLaneReached = 0;
   score = 0;
   document.getElementById('score-board').innerText = score;
+  smoothCameraZ = 0;
   camera.position.set(camOffset.x, camOffset.y, camOffset.z);
   camera.lookAt(0, 0, 0);
 }
@@ -126,20 +130,19 @@ function animate(now) {
   requestAnimationFrame(animate);
   if (isPaused) return;
 
-  // Jump animation interpolation
+  // Jump animation with zero screen shake
   if (jump.isJumping) {
     const elapsed = now - jump.startTime;
     const t = Math.min(elapsed / jump.duration, 1);
 
-    // Linear horizontal motion
     chicken.position.x = THREE.MathUtils.lerp(jump.startX, jump.targetX, t);
     chicken.position.z = THREE.MathUtils.lerp(jump.startZ, jump.targetZ, t);
 
-    // Parabolic arc (jump height = 9 units)
-    chicken.position.y = Math.sin(t * Math.PI) * 9;
+    // Parabolic arc for chicken only
+    chicken.position.y = Math.sin(t * Math.PI) * 8.5;
 
-    // Subtle squash/stretch
-    const squash = 1 + Math.sin(t * Math.PI) * 0.18;
+    // Body squash/stretch
+    const squash = 1 + Math.sin(t * Math.PI) * 0.15;
     chicken.scale.set(1 / Math.sqrt(squash), squash, 1 / Math.sqrt(squash));
 
     if (t >= 1) {
@@ -149,14 +152,14 @@ function animate(now) {
     }
   }
 
-  // Smooth camera follow
-  const targetCamZ = chicken.position.z + camOffset.z;
-  camera.position.z += (targetCamZ - camera.position.z) * 0.08;
-  camera.position.x = camOffset.x;
-  camera.position.y = camOffset.y;
-  camera.lookAt(0, 0, chicken.position.z);
+  // Camera stays level and follows target ground lane
+  const targetZ = -currentLane * STEP_SIZE;
+  smoothCameraZ += (targetZ - smoothCameraZ) * 0.08;
 
-  // Vehicles & Collisions
+  camera.position.set(camOffset.x, camOffset.y, smoothCameraZ + camOffset.z);
+  camera.lookAt(0, 0, smoothCameraZ);
+
+  // Vehicles update & collision
   for (let i = vehicles.length - 1; i >= 0; i--) {
     const car = vehicles[i];
     car.position.x += car.userData.lane.speed;
