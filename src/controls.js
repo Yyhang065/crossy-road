@@ -1,24 +1,16 @@
 export function setupControls(onMove) {
-  // Touch directional buttons
-  const bindTouch = (id, direction) => {
+  const bind = (id, dir) => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      onMove(direction);
-    });
-    el.addEventListener('mousedown', (e) => {
-      e.preventDefault();
-      onMove(direction);
-    });
+    el.addEventListener('touchstart', (e) => { e.preventDefault(); onMove(dir); });
+    el.addEventListener('mousedown', (e) => { e.preventDefault(); onMove(dir); });
   };
 
-  bindTouch('btn-up', 'up');
-  bindTouch('btn-down', 'down');
-  bindTouch('btn-left', 'left');
-  bindTouch('btn-right', 'right');
+  bind('btn-up', 'up');
+  bind('btn-down', 'down');
+  bind('btn-left', 'left');
+  bind('btn-right', 'right');
 
-  // Keyboard navigation
   window.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowUp' || e.key === 'w') onMove('up');
     if (e.key === 'ArrowDown' || e.key === 's') onMove('down');
