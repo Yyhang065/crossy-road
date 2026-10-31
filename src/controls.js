@@ -1,20 +1,44 @@
 export function setupControls(onMove) {
-  const bind = (id, dir) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.addEventListener('touchstart', (e) => { e.preventDefault(); onMove(dir); });
-    el.addEventListener('mousedown', (e) => { e.preventDefault(); onMove(dir); });
+  // Keyboard
+  window.addEventListener('keydown', (e) => {
+    switch (e.key) {
+      case 'ArrowUp':
+      case 'w':
+      case 'W':
+        onMove('up');
+        break;
+      case 'ArrowDown':
+      case 's':
+      case 'S':
+        onMove('down');
+        break;
+      case 'ArrowLeft':
+      case 'a':
+      case 'A':
+        onMove('left');
+        break;
+      case 'ArrowRight':
+      case 'd':
+      case 'D':
+        onMove('right');
+        break;
+    }
+  });
+
+  // Touch button bindings
+  const bindButton = (id, direction) => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    const trigger = (e) => {
+      e.preventDefault();
+      onMove(direction);
+    };
+    btn.addEventListener('touchstart', trigger, { passive: false });
+    btn.addEventListener('click', trigger);
   };
 
-  bind('btn-up', 'up');
-  bind('btn-down', 'down');
-  bind('btn-left', 'left');
-  bind('btn-right', 'right');
-
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowUp' || e.key === 'w') onMove('up');
-    if (e.key === 'ArrowDown' || e.key === 's') onMove('down');
-    if (e.key === 'ArrowLeft' || e.key === 'a') onMove('left');
-    if (e.key === 'ArrowRight' || e.key === 'd') onMove('right');
-  });
+  bindButton('btn-up', 'up');
+  bindButton('btn-down', 'down');
+  bindButton('btn-left', 'left');
+  bindButton('btn-right', 'right');
 }
