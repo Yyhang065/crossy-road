@@ -39,7 +39,7 @@ const cameraPresets = {
 let camOffset = { ...cameraPresets.classic };
 camera.position.set(camOffset.x, camOffset.y, camOffset.z);
 
-// Renderer
+// Renderer setup
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -53,11 +53,11 @@ const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
 dirLight.position.set(120, 220, 80);
 scene.add(dirLight);
 
-// Chicken
+// Chicken Character
 const chicken = createChicken();
 scene.add(chicken);
 
-// Generate starter lanes
+// Generate starter lanes (Fixed: passing floaters & obstacles)
 for (let i = 0; i < 40; i++) {
   lanes.push(createLane(i, STEP_SIZE, scene, vehicles, floaters, obstacles));
 }
@@ -146,10 +146,12 @@ setupUI({
   onPause: () => { isPaused = true; },
   onResume: () => { isPaused = false; },
   onRestart: () => { isPaused = false; resetRun(); },
-  onCameraChange: (mode) => { camOffset = { ...cameraPresets[mode] }; }
+  onCameraChange: (mode) => { 
+    if (cameraPresets[mode]) camOffset = { ...cameraPresets[mode] }; 
+  }
 });
 
-// Main Loop
+// Main Animation Loop
 function animate(now) {
   requestAnimationFrame(animate);
   if (isPaused) return;
@@ -185,7 +187,7 @@ function animate(now) {
   smoothCameraZ += (targetCamZ - smoothCameraZ) * 0.08;
   camera.position.set(camOffset.x, camOffset.y, smoothCameraZ + camOffset.z);
 
-  // Vehicles
+  // Moving Vehicles
   for (let i = 0; i < vehicles.length; i++) {
     const v = vehicles[i];
     v.position.x += v.userData.lane.speed;
@@ -234,7 +236,7 @@ function animate(now) {
 }
 requestAnimationFrame(animate);
 
-// Resize
+// Resize handler
 window.addEventListener('resize', () => {
   const a = window.innerWidth / window.innerHeight;
   camera.left = -d * a;
