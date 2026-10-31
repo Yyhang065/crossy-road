@@ -3,264 +3,101 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-  <title>Crossy Road 3D</title>
+  <title>Crossy Road 3D - v1.0.2</title>
+  <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <style>
-    * { box-sizing: border-box; touch-action: manipulation; user-select: none; }
-    body {
-      margin: 0;
-      overflow: hidden;
-      background: #000;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-    #canvas-container {
-      width: 100vw;
-      height: 100vh;
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-    #score-board {
-      position: absolute;
-      top: 24px;
-      left: 24px;
-      color: #ffffff;
-      font-size: 40px;
-      font-weight: 900;
-      text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.4);
-      z-index: 10;
-    }
-    #controls {
-      position: absolute;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: grid;
-      grid-template-columns: 68px 68px 68px;
-      grid-gap: 12px;
-      z-index: 10;
-    }
-    .btn {
-      width: 68px;
-      height: 68px;
-      background: rgba(255, 255, 255, 0.85);
-      border: 3px solid rgba(255, 255, 255, 0.95);
-      border-radius: 18px;
-      font-size: 24px;
-      color: #222;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
-    }
-    .btn:active {
-      transform: scale(0.92);
-      background: #ffffff;
-    }
-    #home-screen {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.5);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 100;
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
-    }
-    #home-screen .title {
-      color: #fff;
-      font-size: 42px;
-      font-weight: 900;
-      letter-spacing: 2px;
-      text-shadow: 3px 3px 0px #e74c3c, 6px 6px 0px #34495e;
-      margin-bottom: 8px;
-    }
-    #home-screen .version-badge {
-      background: #2ecc71;
-      color: #ffffff;
-      padding: 4px 14px;
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: bold;
-      letter-spacing: 1px;
-      margin-bottom: 24px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    }
-    .btn-group {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      align-items: center;
-    }
-    #start-btn {
-      background: #f1c40f;
-      color: #2c3e50;
-      border: none;
-      font-size: 22px;
-      font-weight: 900;
-      padding: 16px 36px;
-      border-radius: 14px;
-      box-shadow: 0 8px 0 #d4ac0d, 0 12px 20px rgba(0,0,0,0.3);
-      cursor: pointer;
-    }
-    #start-btn:active {
-      transform: translateY(4px);
-      box-shadow: 0 4px 0 #d4ac0d;
-    }
-    #log-btn {
-      background: rgba(255, 255, 255, 0.2);
-      color: #ffffff;
-      border: 2px solid rgba(255, 255, 255, 0.6);
-      font-size: 15px;
-      font-weight: 700;
-      padding: 10px 24px;
-      border-radius: 12px;
-      cursor: pointer;
-      letter-spacing: 1px;
-    }
-    #log-modal {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.85);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 200;
-    }
-    .modal-content {
-      background: #1e272e;
-      color: #fff;
-      width: 85%;
-      max-width: 440px;
-      max-height: 75vh;
-      padding: 24px;
-      border-radius: 20px;
-      border: 2px solid rgba(255, 255, 255, 0.15);
-      display: flex;
-      flex-direction: column;
-    }
-    .modal-content h2 {
-      margin: 0 0 16px 0;
-      font-size: 22px;
-      font-weight: 800;
-      text-align: center;
-    }
-    .log-entries {
-      overflow-y: auto;
-      padding-right: 6px;
-      margin-bottom: 18px;
-    }
-    .log-entry {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 12px;
-      padding: 12px 14px;
-      margin-bottom: 12px;
-    }
-    .log-entry.current {
-      border: 1px solid #2ecc71;
-      background: rgba(46, 204, 113, 0.1);
-    }
-    .log-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-    .log-header .tag {
-      font-weight: 800;
-      font-size: 14px;
-      color: #f1c40f;
-    }
-    .log-header .date {
-      font-size: 11px;
-      text-transform: uppercase;
-      color: #2ecc71;
-      font-weight: 700;
-    }
-    .log-entry ul {
-      margin: 0;
-      padding-left: 18px;
-      font-size: 13px;
-      color: #d2dae2;
-      line-height: 1.5;
-    }
-    #close-log-btn {
-      background: #e74c3c;
-      color: #fff;
-      border: none;
-      font-size: 15px;
-      font-weight: 800;
-      padding: 12px 0;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-    .hidden {
-      display: none !important;
-    }
-  </style>
 </head>
 <body>
-  <div id="score-board">0</div>
-  <div id="canvas-container"></div>
-
-  <!-- Start Screen -->
-  <div id="home-screen">
-    <div class="title">CROSSY ROAD</div>
-    <div class="version-badge">v1.0.1</div>
-    
-    <div class="btn-group">
-      <button id="start-btn">TAP TO PLAY</button>
-      <button id="log-btn">UPDATE LOG</button>
-    </div>
-
-    <!-- Update Log Modal -->
-    <div id="log-modal" class="hidden">
-      <div class="modal-content">
-        <h2>Patch Notes</h2>
-        <div class="log-entries">
-          <div class="log-entry current">
-            <div class="log-header">
-              <span class="tag">v1.0.1</span>
-              <span class="date">Latest</span>
-            </div>
-            <ul>
-              <li>Fixed startup module crash.</li>
-              <li>Integrated home overlay with direct 3D canvas render.</li>
-              <li>Added responsive touch directional controls.</li>
-            </ul>
-          </div>
-          <div class="log-entry">
-            <div class="log-header">
-              <span class="tag">v1.0.0</span>
-            </div>
-            <ul>
-              <li>Upgraded to full 3D Voxel Chicken mesh.</li>
-              <li>Added traffic lanes with moving cars and collision detection.</li>
-              <li>Introduced procedural lane generation and scoring system.</li>
-            </ul>
-          </div>
-          <div class="log-entry">
-            <div class="log-header">
-              <span class="tag">v0.0.1</span>
-            </div>
-            <ul>
-              <li>Initial prototype: Three.js isometric test with white cube.</li>
-            </ul>
-          </div>
-        </div>
-        <button id="close-log-btn">CLOSE</button>
-      </div>
+  <div id="top-bar">
+    <div id="score-board">0</div>
+    <div class="top-actions">
+      <button class="icon-btn" id="pause-top-btn" title="Pause">⏸</button>
+      <button class="icon-btn" id="settings-top-btn" title="Settings">⚙️</button>
     </div>
   </div>
 
+  <div id="canvas-container"></div>
+
+  <!-- Start Screen -->
+  <div id="home-screen" class="overlay-screen">
+    <div class="title">CROSSY ROAD</div>
+    <div class="version-badge">v1.0.2</div>
+    <div class="btn-group">
+      <button class="menu-btn" id="start-btn">TAP TO PLAY</button>
+      <button class="menu-btn secondary-btn" id="log-btn">UPDATE LOG</button>
+      <button class="menu-btn secondary-btn" id="settings-home-btn">SETTINGS</button>
+    </div>
+  </div>
+
+  <!-- Pause Screen -->
+  <div id="pause-screen" class="overlay-screen hidden">
+    <div class="title">PAUSED</div>
+    <div class="btn-group" style="margin-top: 16px;">
+      <button class="menu-btn" id="resume-btn">RESUME</button>
+      <button class="menu-btn secondary-btn" id="restart-btn">RESTART RUN</button>
+      <button class="menu-btn secondary-btn" id="settings-pause-btn">SETTINGS</button>
+    </div>
+  </div>
+
+  <!-- Settings Dialog -->
+  <div id="settings-dialog" class="overlay-screen hidden">
+    <div class="dialog-card">
+      <h2>Game Settings</h2>
+      <div class="setting-row">
+        <span class="setting-label">Camera Angle</span>
+        <select id="camera-select" class="setting-select">
+          <option value="classic" selected>Classic Isometric</option>
+          <option value="high">High Overhead</option>
+          <option value="close">Close Follow</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">D-Pad Opacity</span>
+        <select id="opacity-select" class="setting-select">
+          <option value="0.9" selected>Normal (90%)</option>
+          <option value="0.5">Subtle (50%)</option>
+          <option value="0.2">Minimal (20%)</option>
+        </select>
+      </div>
+      <button class="close-btn" id="close-settings-btn">DONE</button>
+    </div>
+  </div>
+
+  <!-- Update Log Dialog -->
+  <div id="log-dialog" class="overlay-screen hidden">
+    <div class="dialog-card">
+      <h2>Patch Notes</h2>
+      <div class="log-entries">
+        <div class="log-entry current">
+          <div class="log-header">
+            <span class="tag">v1.0.2</span>
+            <span class="date">Latest</span>
+          </div>
+          <ul>
+            <li>Smooth arc-hop jump physics & squash-stretch.</li>
+            <li>In-game Pause menu (Resume / Restart).</li>
+            <li>Settings menu (Camera presets, D-Pad opacity).</li>
+            <li>Separated project cleanly into ES modules.</li>
+          </ul>
+        </div>
+        <div class="log-entry">
+          <div class="log-header"><span class="tag">v1.0.1</span></div>
+          <ul>
+            <li>Added start screen and update log.</li>
+          </ul>
+        </div>
+        <div class="log-entry">
+          <div class="log-header"><span class="tag">v1.0.0</span></div>
+          <ul>
+            <li>Voxel chicken model, moving traffic, scoring.</li>
+          </ul>
+        </div>
+      </div>
+      <button class="close-btn" id="close-log-btn">CLOSE</button>
+    </div>
+  </div>
+
+  <!-- Touch Controls -->
   <div id="controls">
     <div></div><button class="btn" id="btn-up">▲</button><div></div>
     <button class="btn" id="btn-left">◀</button>
@@ -268,226 +105,6 @@
     <button class="btn" id="btn-right">▶</button>
   </div>
 
-  <script>
-    // --- State & Config ---
-    const STEP_SIZE = 20;
-    let score = 0;
-    let maxLaneReached = 0;
-    let currentLane = 0;
-    let currentX = 0;
-    let gameStarted = false;
-
-    const lanes = [];
-    const vehicles = [];
-    const carColors = [0xe74c3c, 0x3498db, 0xf1c40f, 0x9b59b6, 0x1abc9c];
-
-    // --- Scene & Camera ---
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xa7d8ff);
-
-    const d = 160;
-    const aspect = window.innerWidth / window.innerHeight;
-    const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 1000);
-    camera.position.set(200, 240, 200);
-    camera.lookAt(0, 0, 0);
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = true;
-    document.getElementById('canvas-container').appendChild(renderer.domElement);
-
-    // --- Lighting ---
-    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
-    dirLight.position.set(100, 200, 50);
-    scene.add(dirLight);
-
-    // --- Chicken Mesh ---
-    const chicken = new THREE.Group();
-    const bodyMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
-    const beakMat = new THREE.MeshLambertMaterial({ color: 0xff9900 });
-    const combMat = new THREE.MeshLambertMaterial({ color: 0xee2222 });
-    const eyeMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
-
-    const body = new THREE.Mesh(new THREE.BoxGeometry(12, 14, 12), bodyMat);
-    body.position.y = 8;
-    chicken.add(body);
-
-    const comb = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 8), combMat);
-    comb.position.set(0, 16, 0);
-    chicken.add(comb);
-
-    const beak = new THREE.Mesh(new THREE.BoxGeometry(4, 3, 4), beakMat);
-    beak.position.set(0, 8, -7);
-    chicken.add(beak);
-
-    const eyeL = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 1), eyeMat);
-    eyeL.position.set(4, 10, -6.2);
-    const eyeR = eyeL.clone();
-    eyeR.position.x = -4;
-    chicken.add(eyeL);
-    chicken.add(eyeR);
-
-    chicken.position.set(0, 0, 0);
-    scene.add(chicken);
-
-    // --- Lanes & Cars ---
-    function spawnCar(lane, startX) {
-      const car = new THREE.Group();
-      const carBody = new THREE.Mesh(
-        new THREE.BoxGeometry(24, 10, 14),
-        new THREE.MeshLambertMaterial({ color: lane.carColor })
-      );
-      carBody.position.y = 6;
-      car.add(carBody);
-
-      const cabin = new THREE.Mesh(
-        new THREE.BoxGeometry(14, 7, 12),
-        new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 })
-      );
-      cabin.position.set(-2, 13, 0);
-      car.add(cabin);
-
-      car.position.set(startX, 0, lane.z);
-      car.userData = { lane };
-      scene.add(car);
-      vehicles.push(car);
-    }
-
-    function createLane(index) {
-      const z = -index * STEP_SIZE;
-      const type = index <= 2 ? 'grass' : (Math.random() < 0.65 ? 'road' : 'grass');
-
-      const ground = new THREE.Mesh(
-        new THREE.BoxGeometry(1000, 4, STEP_SIZE),
-        new THREE.MeshLambertMaterial({ color: type === 'grass' ? 0x76c043 : 0x3e444c })
-      );
-      ground.position.set(0, -2, z);
-      scene.add(ground);
-
-      const laneData = { index, z, type };
-      if (type === 'road') {
-        laneData.speed = (Math.random() * 1.2 + 0.8) * (Math.random() < 0.5 ? 1 : -1);
-        laneData.carColor = carColors[Math.floor(Math.random() * carColors.length)];
-        spawnCar(laneData, (Math.random() - 0.5) * 300);
-      }
-      lanes.push(laneData);
-    }
-
-    for (let i = 0; i < 35; i++) {
-      createLane(i);
-    }
-
-    // --- Movement Logic ---
-    function move(dir) {
-      if (!gameStarted) return;
-
-      if (dir === 'up') {
-        currentLane++;
-        chicken.rotation.y = 0;
-      } else if (dir === 'down' && currentLane > 0) {
-        currentLane--;
-        chicken.rotation.y = Math.PI;
-      } else if (dir === 'left' && currentX > -140) {
-        currentX -= STEP_SIZE;
-        chicken.rotation.y = Math.PI / 2;
-      } else if (dir === 'right' && currentX < 140) {
-        currentX += STEP_SIZE;
-        chicken.rotation.y = -Math.PI / 2;
-      }
-
-      chicken.position.x = currentX;
-      chicken.position.z = -currentLane * STEP_SIZE;
-
-      camera.position.z = chicken.position.z + 200;
-      camera.lookAt(0, 0, chicken.position.z);
-
-      if (currentLane > maxLaneReached) {
-        maxLaneReached = currentLane;
-        score = maxLaneReached;
-        document.getElementById('score-board').innerText = score;
-        createLane(lanes.length);
-      }
-    }
-
-    // --- Controls Binding ---
-    const bindBtn = (id, dir) => {
-      const el = document.getElementById(id);
-      el.addEventListener('touchstart', (e) => { e.preventDefault(); move(dir); });
-      el.addEventListener('mousedown', (e) => { e.preventDefault(); move(dir); });
-    };
-    bindBtn('btn-up', 'up');
-    bindBtn('btn-down', 'down');
-    bindBtn('btn-left', 'left');
-    bindBtn('btn-right', 'right');
-
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowUp' || e.key === 'w') move('up');
-      if (e.key === 'ArrowDown' || e.key === 's') move('down');
-      if (e.key === 'ArrowLeft' || e.key === 'a') move('left');
-      if (e.key === 'ArrowRight' || e.key === 'd') move('right');
-    });
-
-    // --- UI Listeners ---
-    const homeScreen = document.getElementById('home-screen');
-    const startBtn = document.getElementById('start-btn');
-    const logBtn = document.getElementById('log-btn');
-    const logModal = document.getElementById('log-modal');
-    const closeLogBtn = document.getElementById('close-log-btn');
-
-    function startGame() {
-      gameStarted = true;
-      homeScreen.classList.add('hidden');
-    }
-
-    startBtn.addEventListener('click', startGame);
-    startBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startGame(); });
-
-    logBtn.addEventListener('click', () => logModal.classList.remove('hidden'));
-    logBtn.addEventListener('touchstart', (e) => { e.preventDefault(); logModal.classList.remove('hidden'); });
-
-    closeLogBtn.addEventListener('click', () => logModal.classList.add('hidden'));
-    closeLogBtn.addEventListener('touchstart', (e) => { e.preventDefault(); logModal.classList.add('hidden'); });
-
-    // --- Game Loop ---
-    function animate() {
-      requestAnimationFrame(animate);
-
-      for (let i = vehicles.length - 1; i >= 0; i--) {
-        const car = vehicles[i];
-        car.position.x += car.userData.lane.speed;
-
-        if (car.position.x > 320) car.position.x = -320;
-        if (car.position.x < -320) car.position.x = 320;
-
-        if (
-          Math.abs(car.position.z - chicken.position.z) < 10 &&
-          Math.abs(car.position.x - chicken.position.x) < 16
-        ) {
-          currentLane = 0;
-          currentX = 0;
-          chicken.position.set(0, 0, 0);
-          camera.position.z = 200;
-          camera.lookAt(0, 0, 0);
-          maxLaneReached = 0;
-          score = 0;
-          document.getElementById('score-board').innerText = score;
-        }
-      }
-
-      renderer.render(scene, camera);
-    }
-    animate();
-
-    window.addEventListener('resize', () => {
-      const a = window.innerWidth / window.innerHeight;
-      camera.left = -d * a;
-      camera.right = d * a;
-      camera.top = d;
-      camera.bottom = -d;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-  </script>
+  <script type="module" src="src/main.js"></script>
 </body>
 </html>
