@@ -15,40 +15,47 @@ let isPaused = false;
 
 const lanes = [];
 const vehicles = [];
+const floaters = [];
+const obstacles = [];
 
-// Scene Setup
+// Scene & Camera
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xa7d8ff);
+scene.background = new THREE.Color(0x90caf9);
 
 const d = 160;
 const aspect = window.innerWidth / window.innerHeight;
-const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 1000);
+const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 2000);
+
+// Fixed isometric orientation without lookAt jitter
+camera.rotation.order = 'YXZ';
+camera.rotation.y = -Math.PI / 4;
+camera.rotation.x = Math.atan(-1 / Math.sqrt(2));
 
 const cameraPresets = {
-  classic: { x: 200, y: 240, z: 200 },
-  high: { x: 120, y: 320, z: 160 },
-  close: { x: 140, y: 170, z: 140 }
+  classic: { x: 220, y: 260, z: 220 },
+  high: { x: 140, y: 340, z: 180 },
+  close: { x: 150, y: 190, z: 150 }
 };
 let camOffset = { ...cameraPresets.classic };
 camera.position.set(camOffset.x, camOffset.y, camOffset.z);
-camera.lookAt(0, 0, 0);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 document.getElementById('canvas-container').appendChild(renderer.domElement);
 
 scene.add(new THREE.AmbientLight(0xffffff, 0.75));
 const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
-dirLight.position.set(100, 200, 50);
+dirLight.position.set(120, 220, 80);
 scene.add(dirLight);
 
 // Character
 const chicken = createChicken();
 scene.add(chicken);
 
-// Populate map
-for (let i = 0; i < 35; i++) {
-  lanes.push(createLane(i, STEP_SIZE, scene, vehicles));
+// Populate starting map
+for (let i = 0; i < 40; i++) {
+  lanes.push(createLane(i, STEP_SIZE, scene, vehicles, floaters, obstacles));
 }
 
 // Hop Animation State
@@ -58,37 +65,51 @@ const jump = {
   startZ: 0,
   targetX: 0,
   targetZ: 0,
-  duration: 160,
+  duration: 150,
   startTime: 0
 };
 
-// Smooth Camera Follow Variable (Stabilized)
 let smoothCameraZ = 0;
+let activeLog = null;
+
+function isBlocked(x, z) {
+  return obstacles.some(obs => Math.abs(obs.x - x) < 10 && Math.abs(obs.z - z) < 10);
+}
 
 function triggerMove(dir) {
   if (!gameStarted || isPaused || jump.isJumping) return;
 
-  jump.startX = currentX;
-  jump.startZ = -currentLane * STEP_SIZE;
+  let nextLane = currentLane;
+  let nextX = currentX;
 
   if (dir === 'up') {
-    currentLane++;
+    nextLane++;
     chicken.rotation.y = 0;
   } else if (dir === 'down' && currentLane > 0) {
-    currentLane--;
+    nextLane--;
     chicken.rotation.y = Math.PI;
   } else if (dir === 'left' && currentX > -140) {
-    currentX -= STEP_SIZE;
+    nextX -= STEP_SIZE;
     chicken.rotation.y = Math.PI / 2;
   } else if (dir === 'right' && currentX < 140) {
-    currentX += STEP_SIZE;
+    nextX += STEP_SIZE;
     chicken.rotation.y = -Math.PI / 2;
   } else {
     return;
   }
 
+  // Obstacle (Tree) check
+  const targetZ = -nextLane * STEP_SIZE;
+  if (isBlocked(nextX, targetZ)) return;
+
+  activeLog = null;
+  currentLane = nextLane;
+  currentX = nextX;
+
+  jump.startX = chicken.position.x;
+  jump.startZ = chicken.position.z;
   jump.targetX = currentX;
-  jump.targetZ = -currentLane * STEP_SIZE;
+  jump.targetZ = targetZ;
   jump.isJumping = true;
   jump.startTime = performance.now();
 
@@ -96,7 +117,7 @@ function triggerMove(dir) {
     maxLaneReached = currentLane;
     score = maxLaneReached;
     document.getElementById('score-board').innerText = score;
-    lanes.push(createLane(lanes.length, STEP_SIZE, scene, vehicles));
+    lanes.push(createLane(lanes.length, STEP_SIZE, scene, vehicles, floaters, obstacles));
   }
 }
 
@@ -105,12 +126,12 @@ function resetRun() {
   currentX = 0;
   chicken.position.set(0, 0, 0);
   jump.isJumping = false;
+  activeLog = null;
   maxLaneReached = 0;
   score = 0;
   document.getElementById('score-board').innerText = score;
   smoothCameraZ = 0;
   camera.position.set(camOffset.x, camOffset.y, camOffset.z);
-  camera.lookAt(0, 0, 0);
 }
 
 // Connect UI & Controls
@@ -120,29 +141,24 @@ setupUI({
   onPause: () => { isPaused = true; },
   onResume: () => { isPaused = false; },
   onRestart: () => { isPaused = false; resetRun(); },
-  onCameraChange: (mode) => {
-    camOffset = { ...cameraPresets[mode] };
-  }
+  onCameraChange: (mode) => { camOffset = { ...cameraPresets[mode] }; }
 });
 
-// Main Loop
+// Game Loop
 function animate(now) {
   requestAnimationFrame(animate);
   if (isPaused) return;
 
-  // Jump animation with zero screen shake
+  // Jump interpolation
   if (jump.isJumping) {
     const elapsed = now - jump.startTime;
     const t = Math.min(elapsed / jump.duration, 1);
 
     chicken.position.x = THREE.MathUtils.lerp(jump.startX, jump.targetX, t);
     chicken.position.z = THREE.MathUtils.lerp(jump.startZ, jump.targetZ, t);
+    chicken.position.y = Math.sin(t * Math.PI) * 7.5;
 
-    // Parabolic arc for chicken only
-    chicken.position.y = Math.sin(t * Math.PI) * 8.5;
-
-    // Body squash/stretch
-    const squash = 1 + Math.sin(t * Math.PI) * 0.15;
+    const squash = 1 + Math.sin(t * Math.PI) * 0.12;
     chicken.scale.set(1 / Math.sqrt(squash), squash, 1 / Math.sqrt(squash));
 
     if (t >= 1) {
@@ -150,28 +166,62 @@ function animate(now) {
       chicken.position.set(jump.targetX, 0, jump.targetZ);
       chicken.scale.set(1, 1, 1);
     }
+  } else if (activeLog) {
+    // Ride moving log
+    chicken.position.x += activeLog.userData.speed || 0;
+    currentX = chicken.position.x;
+    if (chicken.position.x > 180 || chicken.position.x < -180) {
+      resetRun();
+    }
   }
 
-  // Camera stays level and follows target ground lane
-  const targetZ = -currentLane * STEP_SIZE;
-  smoothCameraZ += (targetZ - smoothCameraZ) * 0.08;
-
+  // Shake-free camera tracking purely along ground plane
+  const targetCamZ = -currentLane * STEP_SIZE;
+  smoothCameraZ += (targetCamZ - smoothCameraZ) * 0.08;
   camera.position.set(camOffset.x, camOffset.y, smoothCameraZ + camOffset.z);
-  camera.lookAt(0, 0, smoothCameraZ);
 
-  // Vehicles update & collision
-  for (let i = vehicles.length - 1; i >= 0; i--) {
-    const car = vehicles[i];
-    car.position.x += car.userData.lane.speed;
-
-    if (car.position.x > 320) car.position.x = -320;
-    if (car.position.x < -320) car.position.x = 320;
+  // Update vehicles & check crash
+  for (let i = 0; i < vehicles.length; i++) {
+    const v = vehicles[i];
+    v.position.x += v.userData.lane.speed;
+    if (v.position.x > 340) v.position.x = -340;
+    if (v.position.x < -340) v.position.x = 340;
 
     if (
-      Math.abs(car.position.z - chicken.position.z) < 10 &&
-      Math.abs(car.position.x - chicken.position.x) < 16
+      Math.abs(v.position.z - chicken.position.z) < 9 &&
+      Math.abs(v.position.x - chicken.position.x) < (v.userData.width / 2 + 5)
     ) {
       resetRun();
+      return;
+    }
+  }
+
+  // Update floating logs
+  let onFloater = false;
+  for (let i = 0; i < floaters.length; i++) {
+    const f = floaters[i];
+    if (f.userData.speed) {
+      f.position.x += f.userData.speed;
+      if (f.position.x > 340) f.position.x = -340;
+      if (f.position.x < -340) f.position.x = 340;
+    }
+
+    if (
+      !jump.isJumping &&
+      Math.abs(f.position.z - chicken.position.z) < 8 &&
+      Math.abs(f.position.x - chicken.position.x) < (f.userData.width / 2 + 4)
+    ) {
+      onFloater = true;
+      activeLog = f.userData.speed ? f : null;
+    }
+  }
+
+  // Water check: drown if landing on water without a platform
+  if (!jump.isJumping) {
+    const currentLaneData = lanes[currentLane];
+    if (currentLaneData && currentLaneData.type === 'water' && !onFloater) {
+      resetRun();
+      return;
     }
   }
 
