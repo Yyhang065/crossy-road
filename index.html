@@ -1,24 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-  <title>Crossy Road 3D</title>
-  <link rel="stylesheet" href="style.css">
-  <!-- Load Three.js from CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-</head>
-<body>
-  <div id="score-board">0</div>
-  <div id="canvas-container"></div>
-  <div id="controls">
-    <div></div><button class="btn" id="btn-up">▲</button><div></div>
-    <button class="btn" id="btn-left">◀</button>
-    <button class="btn" id="btn-down">▼</button>
-    <button class="btn" id="btn-right">▶</button>
-  </div>
+<!-- Start Screen with Version & Update Log -->
+  <div id="home-screen">
+    <div class="title">CROSSY ROAD</div>
+    <div class="version-badge">v1.0.1</div>
+    
+    <div class="btn-group">
+      <button id="start-btn">TAP TO PLAY</button>
+      <button id="log-btn">UPDATE LOG</button>
+    </div>
 
-  <!-- Entry Point using standard ES Module -->
-  <script type="module" src="src/main.js"></script>
-</body>
-</html>
+    <!-- Update Log Modal -->
+    <div id="log-modal" class="hidden">
+      <div class="modal-content">
+        <h2>Patch Notes</h2>
+        <div class="log-entries">
+          <div class="log-entry current">
+            <div class="log-header">
+              <span class="tag">v1.0.1</span>
+              <span class="date">Latest</span>
+            </div>
+            <ul>
+              <li>Added start home screen and versioning.</li>
+              <li>Integrated interactive in-game changelog.</li>
+              <li>Split project into modular ES modules (`src/`).</li>
+            </ul>
+          </div>
+
+          <div class="log-entry">
+            <div class="log-header">
+              <span class="tag">v1.0.0</span>
+            </div>
+            <ul>
+              <li>Upgraded to full 3D Voxel Chicken mesh.</li>
+              <li>Added traffic lanes with moving cars and collision detection.</li>
+              <li>Introduced on-screen iPad directional touch controls.</li>
+              <li>Procedural lane generation and scoring system.</li>
+            </ul>
+          </div>
+
+          <div class="log-entry">
+            <div class="log-header">
+              <span class="tag">v0.0.1</span>
+            </div>
+            <ul>
+              <li>Initial prototype: Three.js isometric test with white cube.</li>
+            </ul>
+          </div>
+        </div>
+        <button id="close-log-btn">CLOSE</button>
+      </div>
+    </div>
+  </div>
