@@ -22,15 +22,15 @@ const obstacles = [];
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x90caf9);
 
-// Orthographic Camera
+// Orthographic Camera Setup
 const d = 160;
 const aspect = window.innerWidth / window.innerHeight;
 const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 2000);
 
 const cameraPresets = {
-  classic: { x: 220, y: 260, z: 220 },
-  high: { x: 140, y: 340, z: 180 },
-  close: { x: 150, y: 190, z: 150 }
+  classic: { x: 180, y: 220, z: 180 },
+  high: { x: 100, y: 300, z: 140 },
+  close: { x: 120, y: 160, z: 120 }
 };
 let camOffset = { ...cameraPresets.classic };
 camera.position.set(camOffset.x, camOffset.y, camOffset.z);
@@ -152,7 +152,7 @@ setupUI({
   }
 });
 
-// Render Loop
+// Main Game Loop
 function animate(now) {
   requestAnimationFrame(animate);
   if (isPaused) return;
@@ -183,13 +183,17 @@ function animate(now) {
     }
   }
 
-  // Smooth camera tracking
+  // Camera smoothly tracks directly on the chicken's lane progress
   const targetCamZ = -currentLane * STEP_SIZE;
   smoothCameraZ += (targetCamZ - smoothCameraZ) * 0.08;
-  camera.position.set(camOffset.x, camOffset.y, smoothCameraZ + camOffset.z);
-  camera.lookAt(0, 0, smoothCameraZ);
+  camera.position.set(
+    chicken.position.x + camOffset.x,
+    camOffset.y,
+    smoothCameraZ + camOffset.z
+  );
+  camera.lookAt(chicken.position.x, 0, smoothCameraZ);
 
-  // Vehicle motion & collision
+  // Moving Vehicles
   for (let i = 0; i < vehicles.length; i++) {
     const v = vehicles[i];
     v.position.x += v.userData.lane.speed;
@@ -205,7 +209,7 @@ function animate(now) {
     }
   }
 
-  // Floating logs and lily pads
+  // Floating Platforms (Logs & Lily Pads)
   let onFloater = false;
   for (let i = 0; i < floaters.length; i++) {
     const f = floaters[i];
@@ -238,7 +242,7 @@ function animate(now) {
 }
 requestAnimationFrame(animate);
 
-// Window resize
+// Window resize handler
 window.addEventListener('resize', () => {
   const a = window.innerWidth / window.innerHeight;
   camera.left = -d * a;
