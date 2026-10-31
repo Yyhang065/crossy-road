@@ -33,7 +33,7 @@ body, html {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 10;
+  z-index: 50;
   pointer-events: none;
 }
 
@@ -53,7 +53,6 @@ body, html {
 .icon-btn {
   background: rgba(255, 255, 255, 0.85);
   border: none;
-  outline: none;
   border-radius: 12px;
   width: 44px;
   height: 44px;
@@ -73,16 +72,14 @@ body, html {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(10, 25, 40, 0.65);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  z-index: 100;
-  transition: opacity 0.2s ease;
+  z-index: 200;
 }
 
-.hidden {
+.overlay-screen.hidden {
   display: none !important;
-  opacity: 0 !important;
   pointer-events: none !important;
 }
 
@@ -110,13 +107,13 @@ body, html {
   flex-direction: column;
   gap: 12px;
   width: 220px;
+  z-index: 210;
 }
 
 .menu-btn {
   background: #fbc02d;
   color: #37474f;
   border: none;
-  outline: none;
   padding: 14px 20px;
   font-size: 16px;
   font-weight: 800;
@@ -124,6 +121,7 @@ body, html {
   cursor: pointer;
   box-shadow: 0 4px 0 #c49000;
   text-align: center;
+  pointer-events: auto;
 }
 
 .menu-btn:active {
@@ -146,6 +144,7 @@ body, html {
   max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  pointer-events: auto;
 }
 
 .dialog-card h2 {
@@ -225,7 +224,7 @@ body, html {
 .control-group {
   display: flex;
   gap: 12px;
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 .group-vertical {
@@ -240,7 +239,6 @@ body, html {
 .btn {
   background: rgba(255, 255, 255, 0.85);
   border: none;
-  outline: none;
   border-radius: 16px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
   font-size: 24px;
@@ -248,7 +246,8 @@ body, html {
   display: flex;
   align-items: center;
   justify-content: center;
-  touch-action: none;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .btn:active {
@@ -256,12 +255,7 @@ body, html {
   transform: scale(0.95);
 }
 
-.btn-tall {
-  width: 68px;
-  height: 68px;
-}
-
-.btn-wide {
+.btn-tall, .btn-wide {
   width: 68px;
   height: 68px;
 }
