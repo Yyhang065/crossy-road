@@ -6,7 +6,7 @@ import { setupUI } from './ui.js';
 function init() {
   const THREE = window.THREE;
   if (!THREE) {
-    throw new Error('Three.js library failed to load from CDN. Check network or reload.');
+    throw new Error('Three.js failed to load.');
   }
 
   const STEP_SIZE = 20;
@@ -23,23 +23,17 @@ function init() {
   const floaters = [];
   const obstacles = [];
 
-  // Scene
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x90caf9);
+  scene.background = new THREE.Color(0x81d4fa);
 
-  // Orthographic Camera
-  const d = 160;
+  // Closer isometric frustum
+  const d = 110;
   const aspect = window.innerWidth / window.innerHeight;
   const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 2000);
 
-  const cameraPresets = {
-    classic: { x: 120, y: 160, z: 120 },
-    high: { x: 60, y: 240, z: 80 },
-    close: { x: 80, y: 110, z: 80 }
-  };
-  let camOffset = { ...cameraPresets.classic };
+  // Locked isometric camera offset
+  const camOffset = { x: 110, y: 150, z: 110 };
 
-  // Renderer
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -50,9 +44,9 @@ function init() {
 
   // Lighting
   scene.add(new THREE.AmbientLight(0xffffff, 0.85));
-  const dirLight = new THREE.DirectionalLight(0xffffff, 0.65);
-  dirLight.position.set(100, 200, 80);
-  scene.add(dirLight);
+  const sunLight = new THREE.DirectionalLight(0xffffff, 0.7);
+  sunLight.position.set(100, 220, 80);
+  scene.add(sunLight);
 
   // Chicken
   const chicken = createChicken();
@@ -62,7 +56,7 @@ function init() {
   camera.position.set(camOffset.x, camOffset.y, camOffset.z);
   camera.lookAt(0, 0, 0);
 
-  // Lanes
+  // 40 starter lanes
   for (let i = 0; i < 40; i++) {
     lanes.push(createLane(i, STEP_SIZE, scene, vehicles, floaters, obstacles));
   }
@@ -82,7 +76,7 @@ function init() {
   let activeFloater = null;
 
   function isBlocked(x, z) {
-    return obstacles.some(obs => Math.abs(obs.x - x) < 8 && Math.abs(obs.z - z) < 8);
+    return obstacles.some(obs => Math.abs(obs.x - x) < 9 && Math.abs(obs.z - z) < 9);
   }
 
   function triggerMove(dir) {
@@ -97,10 +91,10 @@ function init() {
     } else if (dir === 'down' && currentLane > 0) {
       nextLane--;
       chicken.rotation.y = Math.PI;
-    } else if (dir === 'left' && currentX > -140) {
+    } else if (dir === 'left') {
       nextX -= STEP_SIZE;
       chicken.rotation.y = Math.PI / 2;
-    } else if (dir === 'right' && currentX < 140) {
+    } else if (dir === 'right') {
       nextX += STEP_SIZE;
       chicken.rotation.y = -Math.PI / 2;
     } else {
@@ -153,18 +147,11 @@ function init() {
       gameStarted = true;
       isPaused = false;
     },
-    onPause: () => {
-      isPaused = true;
-    },
-    onResume: () => {
-      isPaused = false;
-    },
+    onPause: () => { isPaused = true; },
+    onResume: () => { isPaused = false; },
     onRestart: () => {
       isPaused = false;
       resetRun();
-    },
-    onCameraChange: (mode) => {
-      if (cameraPresets[mode]) camOffset = { ...cameraPresets[mode] };
     }
   });
 
@@ -191,12 +178,13 @@ function init() {
     } else if (activeFloater && activeFloater.userData.speed) {
       chicken.position.x += activeFloater.userData.speed;
       currentX = chicken.position.x;
-      if (chicken.position.x > 180 || chicken.position.x < -180) {
+      if (chicken.position.x > 130 || chicken.position.x < -130) {
         resetRun();
         return;
       }
     }
 
+    // Camera smoothly follows player
     const targetCamZ = -currentLane * STEP_SIZE;
     smoothCameraZ += (targetCamZ - smoothCameraZ) * 0.08;
     smoothCameraX += (chicken.position.x - smoothCameraX) * 0.08;
@@ -208,33 +196,35 @@ function init() {
     );
     camera.lookAt(smoothCameraX, 0, smoothCameraZ);
 
+    // Vehicles
     for (let i = 0; i < vehicles.length; i++) {
       const v = vehicles[i];
       v.position.x += v.userData.lane.speed;
-      if (v.position.x > 340) v.position.x = -340;
-      if (v.position.x < -340) v.position.x = 340;
+      if (v.position.x > 260) v.position.x = -260;
+      if (v.position.x < -260) v.position.x = 260;
 
       if (
         Math.abs(v.position.z - chicken.position.z) < 9 &&
-        Math.abs(v.position.x - chicken.position.x) < (v.userData.width / 2 + 5)
+        Math.abs(v.position.x - chicken.position.x) < (v.userData.width / 2 + 4.5)
       ) {
         resetRun();
         return;
       }
     }
 
+    // Floating platforms
     let onFloater = false;
     for (let i = 0; i < floaters.length; i++) {
       const f = floaters[i];
       if (f.userData.speed) {
         f.position.x += f.userData.speed;
-        if (f.position.x > 340) f.position.x = -340;
-        if (f.position.x < -340) f.position.x = 340;
+        if (f.position.x > 180) f.position.x = -180;
+        if (f.position.x < -180) f.position.x = 180;
       }
 
       if (
         !jump.isJumping &&
-        Math.abs(f.position.z - chicken.position.z) < 8 &&
+        Math.abs(f.position.z - chicken.position.z) < 8.5 &&
         Math.abs(f.position.x - chicken.position.x) < (f.userData.width / 2 + 4)
       ) {
         onFloater = true;
@@ -242,6 +232,7 @@ function init() {
       }
     }
 
+    // Water collision
     if (!jump.isJumping) {
       const lane = lanes[currentLane];
       if (lane && lane.type === 'water' && !onFloater) {
@@ -265,7 +256,6 @@ function init() {
   });
 }
 
-// Ensure DOM and window.THREE are ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {
