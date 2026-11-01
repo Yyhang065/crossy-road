@@ -12,7 +12,7 @@ body, html {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: #90caf9;
+  background-color: #81d4fa;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -38,10 +38,10 @@ body, html {
 }
 
 #score-board {
-  font-size: 32px;
-  font-weight: 800;
+  font-size: 34px;
+  font-weight: 900;
   color: #ffffff;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.45);
 }
 
 .top-actions {
@@ -51,7 +51,7 @@ body, html {
 }
 
 .icon-btn {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.9);
   border: none;
   border-radius: 12px;
   width: 44px;
@@ -135,81 +135,7 @@ body, html {
   box-shadow: 0 4px 0 #b0bec5;
 }
 
-.dialog-card {
-  background: white;
-  padding: 24px;
-  border-radius: 16px;
-  width: 90%;
-  max-width: 420px;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-  pointer-events: auto;
-}
-
-.dialog-card h2 {
-  margin-bottom: 16px;
-  font-size: 20px;
-  color: #37474f;
-}
-
-.setting-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.setting-select {
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid #cfd8dc;
-  font-weight: 600;
-}
-
-.close-btn {
-  width: 100%;
-  padding: 12px;
-  background: #ff5722;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-weight: bold;
-  cursor: pointer;
-  margin-top: 8px;
-}
-
-.log-entries {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.log-entry {
-  background: #f5f5f5;
-  padding: 12px;
-  border-radius: 8px;
-}
-
-.log-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 6px;
-}
-
-.log-header .tag {
-  font-weight: bold;
-  color: #1976d2;
-}
-
-.log-entry ul {
-  padding-left: 20px;
-  font-size: 13px;
-  color: #546e7a;
-}
-
-/* Controls */
+/* D-Pad Controls */
 #controls-container {
   position: absolute;
   bottom: 24px;
@@ -237,7 +163,7 @@ body, html {
 }
 
 .btn {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.88);
   border: none;
   border-radius: 16px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
@@ -248,10 +174,11 @@ body, html {
   justify-content: center;
   pointer-events: auto;
   cursor: pointer;
+  touch-action: none;
 }
 
 .btn:active {
-  background: rgba(200, 200, 200, 0.9);
+  background: rgba(210, 210, 210, 0.95);
   transform: scale(0.95);
 }
 
@@ -264,7 +191,6 @@ body, html {
   justify-content: flex-end !important;
 }
 
-.layout-cluster .group-vertical,
-.layout-cluster .group-horizontal {
-  position: absolute;
+.layout-hidden {
+  display: none !important;
 }
