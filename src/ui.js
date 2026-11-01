@@ -68,11 +68,6 @@ export function setupUI(handlers) {
   window.addEventListener('orientationchange', updateLayout);
   updateLayout();
 
-  const camSelect = get('camera-select');
-  if (camSelect) {
-    camSelect.addEventListener('change', (e) => handlers.onCameraChange(e.target.value));
-  }
-
   const opSelect = get('opacity-select');
   if (opSelect) {
     opSelect.addEventListener('change', (e) => {
