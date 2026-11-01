@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-  <link rel="icon" type="image/png" href="./favicon.png?v=1.2.0">
-  <title>Crossy Roads - v1.2.0</title>
+  <link rel="icon" type="image/png" href="./favicon.png?v=1.3.0">
+  <title>Crossy Roads</title>
   <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./settings.css">
   
   <style>
     #debug-box {
@@ -52,77 +53,136 @@
 
   <!-- Start Screen -->
   <div id="home-screen" class="overlay-screen">
-    <div class="title">CROSSY ROAD</div>
-    <div class="version-badge">v1.2.0</div>
+    <div class="title" data-i18n="gameTitle">CROSSY ROAD</div>
+    <div class="version-badge">v1.3.0</div>
     <div class="btn-group">
-      <button class="menu-btn" id="start-btn">TAP TO PLAY</button>
-      <button class="menu-btn secondary-btn" id="log-btn">UPDATE LOG</button>
-      <button class="menu-btn secondary-btn" id="settings-home-btn">SETTINGS</button>
+      <button class="menu-btn" id="start-btn" data-i18n="tapToPlay">TAP TO PLAY</button>
+      <button class="menu-btn secondary-btn" id="log-btn" data-i18n="updateLog">UPDATE LOG</button>
+      <button class="menu-btn secondary-btn" id="settings-home-btn" data-i18n="settings">SETTINGS</button>
     </div>
   </div>
 
   <!-- Pause Screen -->
   <div id="pause-screen" class="overlay-screen hidden">
-    <div class="title">PAUSED</div>
+    <div class="title" data-i18n="paused">PAUSED</div>
     <div class="btn-group" style="margin-top: 16px;">
-      <button class="menu-btn" id="resume-btn">RESUME</button>
-      <button class="menu-btn secondary-btn" id="restart-btn">RESTART RUN</button>
-      <button class="menu-btn secondary-btn" id="settings-pause-btn">SETTINGS</button>
+      <button class="menu-btn" id="resume-btn" data-i18n="resume">RESUME</button>
+      <button class="menu-btn secondary-btn" id="restart-btn" data-i18n="restart">RESTART RUN</button>
+      <button class="menu-btn secondary-btn" id="settings-pause-btn" data-i18n="settings">SETTINGS</button>
     </div>
   </div>
 
   <!-- Settings Dialog -->
   <div id="settings-dialog" class="overlay-screen hidden">
     <div class="dialog-card">
-      <h2>Game Settings</h2>
-      <div class="setting-row">
-        <span class="setting-label">Control Layout</span>
-        <select id="layout-select" class="setting-select">
-          <option value="auto" selected>Auto (Orientation)</option>
-          <option value="split">Split (L: ↑↓ / R: ←→)</option>
-          <option value="cluster">Compact D-Pad (Right)</option>
-        </select>
+      <div class="settings-header">
+        <h2 data-i18n="settings">Settings</h2>
       </div>
-      <div class="setting-row">
-        <span class="setting-label">D-Pad Opacity</span>
-        <select id="opacity-select" class="setting-select">
-          <option value="0.9" selected>Normal (90%)</option>
-          <option value="0.5">Subtle (50%)</option>
-          <option value="0.2">Minimal (20%)</option>
-        </select>
+
+      <div class="settings-tabs">
+        <button class="tab-btn active" data-tab="tab-controls" data-i18n="tabControls">Controls</button>
+        <button class="tab-btn" data-tab="tab-video" data-i18n="tabVideo">Video</button>
+        <button class="tab-btn" data-tab="tab-audio" data-i18n="tabAudio">Audio</button>
+        <button class="tab-btn" data-tab="tab-language" data-i18n="tabLanguage">Language</button>
       </div>
-      <button class="close-btn" id="close-settings-btn">DONE</button>
+
+      <!-- Controls Tab -->
+      <div class="tab-content active" id="tab-controls">
+        <div class="setting-row">
+          <span class="setting-label" data-i18n="controlMode">Control Mode</span>
+          <select id="controls-mode-select" class="setting-select">
+            <option value="auto" selected>Auto Detect</option>
+            <option value="touch">Touch D-Pad</option>
+            <option value="keyboard">Keyboard Only</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label" data-i18n="touchLayout">Touch Layout</span>
+          <select id="touch-layout-select" class="setting-select">
+            <option value="auto" selected>Auto (Orientation)</option>
+            <option value="split">Split (L: ↑↓ / R: ←→)</option>
+            <option value="cluster">Compact D-Pad</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label" data-i18n="dpadOpacity">D-Pad Opacity</span>
+          <select id="opacity-select" class="setting-select">
+            <option value="0.9" selected>Normal (90%)</option>
+            <option value="0.5">Subtle (50%)</option>
+            <option value="0.2">Minimal (20%)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Video Tab -->
+      <div class="tab-content" id="tab-video">
+        <div class="setting-row">
+          <span class="setting-label" data-i18n="shadows">Shadows</span>
+          <select id="shadows-select" class="setting-select">
+            <option value="on" selected>Enabled</option>
+            <option value="off">Disabled</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label" data-i18n="cameraAngle">Camera Angle</span>
+          <span class="setting-badge" data-i18n="lockedIso">Locked Isometric</span>
+        </div>
+      </div>
+
+      <!-- Audio Tab -->
+      <div class="tab-content" id="tab-audio">
+        <div class="setting-row">
+          <span class="setting-label" data-i18n="masterVolume">Master Volume</span>
+          <select id="volume-select" class="setting-select">
+            <option value="1.0" selected>100%</option>
+            <option value="0.7">70%</option>
+            <option value="0.3">30%</option>
+            <option value="0">Muted</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label" data-i18n="soundEffects">Sound Effects</span>
+          <select id="sfx-select" class="setting-select">
+            <option value="on" selected>Enabled</option>
+            <option value="off">Disabled</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Language Tab -->
+      <div class="tab-content" id="tab-language">
+        <div class="setting-row">
+          <span class="setting-label" data-i18n="language">Language</span>
+          <select id="language-select" class="setting-select">
+            <option value="en" selected>English</option>
+            <option value="zh">中文 (简体)</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="close-btn" id="close-settings-btn" data-i18n="done">DONE</button>
     </div>
   </div>
 
   <!-- Update Log Dialog -->
   <div id="log-dialog" class="overlay-screen hidden">
     <div class="dialog-card">
-      <h2>Patch Notes</h2>
+      <h2 data-i18n="patchNotes">Patch Notes</h2>
       <div class="log-entries">
         <div class="log-entry current">
           <div class="log-header">
-            <span class="tag">v1.2.0</span>
-            <span class="date">Visual Overhaul</span>
+            <span class="tag">v1.3.0</span>
+            <span class="date">Latest</span>
           </div>
           <ul>
-            <li>Detailed voxel chicken model with crest, beak, wattle, wings & feet.</li>
-            <li>Dense boundary forest & waterfall portals replace invisible side walls.</li>
-            <li>Multi-lane river balancing with guaranteed log passage jumps.</li>
-            <li>Detailed vehicles with wheels, rims, windshields, headlights & tail lights.</li>
-            <li>Closer isometric zoom and locked camera framing.</li>
-          </ul>
-        </div>
-        <div class="log-entry">
-          <div class="log-header">
-            <span class="tag">v1.1.4</span>
-          </div>
-          <ul>
-            <li>Custom favicon and title updates.</li>
+            <li>Revamped 4-tab settings: Controls, Video, Audio, and Language.</li>
+            <li>Dynamic control mode detecting touch devices, orientation, and keyboards.</li>
+            <li>Lower-third isometric camera angle matching classic Crossy Road.</li>
+            <li>Randomized cuboid trees, lavender rocks, and multi-log rivers.</li>
           </ul>
         </div>
       </div>
-      <button class="close-btn" id="close-log-btn">CLOSE</button>
+      <button class="close-btn" id="close-log-btn" data-i18n="close">CLOSE</button>
     </div>
   </div>
 
