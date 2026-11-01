@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-  <link rel="icon" type="image/png" href="./favicon.png">
-  <title>Crossy Roads - v1.1.4</title>
+  <link rel="icon" type="image/png" href="./favicon.png?v=1.2.0">
+  <title>Crossy Roads - v1.2.0</title>
   <link rel="stylesheet" href="./style.css">
   
-  <!-- On-Screen Error Box -->
   <style>
     #debug-box {
       display: none;
@@ -54,7 +53,7 @@
   <!-- Start Screen -->
   <div id="home-screen" class="overlay-screen">
     <div class="title">CROSSY ROAD</div>
-    <div class="version-badge">v1.1.4</div>
+    <div class="version-badge">v1.2.0</div>
     <div class="btn-group">
       <button class="menu-btn" id="start-btn">TAP TO PLAY</button>
       <button class="menu-btn secondary-btn" id="log-btn">UPDATE LOG</button>
@@ -85,14 +84,6 @@
         </select>
       </div>
       <div class="setting-row">
-        <span class="setting-label">Camera Angle</span>
-        <select id="camera-select" class="setting-select">
-          <option value="classic" selected>Classic Isometric</option>
-          <option value="high">High Overhead</option>
-          <option value="close">Close Follow</option>
-        </select>
-      </div>
-      <div class="setting-row">
         <span class="setting-label">D-Pad Opacity</span>
         <select id="opacity-select" class="setting-select">
           <option value="0.9" selected>Normal (90%)</option>
@@ -111,23 +102,23 @@
       <div class="log-entries">
         <div class="log-entry current">
           <div class="log-header">
-            <span class="tag">v1.1.4</span>
-            <span class="date">Latest</span>
+            <span class="tag">v1.2.0</span>
+            <span class="date">Visual Overhaul</span>
           </div>
           <ul>
-            <li>Updated browser title format to Crossy Roads.</li>
-            <li>Added custom voxel chicken favicon support.</li>
-            <li>Fully verified startup loop and touch responsiveness.</li>
+            <li>Detailed voxel chicken model with crest, beak, wattle, wings & feet.</li>
+            <li>Dense boundary forest & waterfall portals replace invisible side walls.</li>
+            <li>Multi-lane river balancing with guaranteed log passage jumps.</li>
+            <li>Detailed vehicles with wheels, rims, windshields, headlights & tail lights.</li>
+            <li>Closer isometric zoom and locked camera framing.</li>
           </ul>
         </div>
         <div class="log-entry">
           <div class="log-header">
-            <span class="tag">v1.1.3</span>
+            <span class="tag">v1.1.4</span>
           </div>
           <ul>
-            <li>Added diagnostic error screen logger.</li>
-            <li>Enforced Three.js pre-flight verification.</li>
-            <li>Resolved iPad touch gesture cancellation.</li>
+            <li>Custom favicon and title updates.</li>
           </ul>
         </div>
       </div>
