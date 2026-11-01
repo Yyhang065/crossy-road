@@ -26,13 +26,13 @@ function init() {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x81d4fa);
 
-  // Closer isometric frustum
+  // Orthographic Camera locked to lower-third authentic perspective
   const d = 110;
   const aspect = window.innerWidth / window.innerHeight;
   const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 2000);
 
-  // Locked isometric camera offset
-  const camOffset = { x: 110, y: 150, z: 110 };
+  // Fixed camera POV offset
+  const camOffset = { x: 95, y: 135, z: 95 };
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -45,7 +45,7 @@ function init() {
   // Lighting
   scene.add(new THREE.AmbientLight(0xffffff, 0.85));
   const sunLight = new THREE.DirectionalLight(0xffffff, 0.7);
-  sunLight.position.set(100, 220, 80);
+  sunLight.position.set(110, 220, 90);
   scene.add(sunLight);
 
   // Chicken
@@ -56,7 +56,6 @@ function init() {
   camera.position.set(camOffset.x, camOffset.y, camOffset.z);
   camera.lookAt(0, 0, 0);
 
-  // 40 starter lanes
   for (let i = 0; i < 40; i++) {
     lanes.push(createLane(i, STEP_SIZE, scene, vehicles, floaters, obstacles));
   }
@@ -67,7 +66,7 @@ function init() {
     startZ: 0,
     targetX: 0,
     targetZ: 0,
-    duration: 150,
+    duration: 140,
     startTime: 0
   };
 
@@ -184,8 +183,8 @@ function init() {
       }
     }
 
-    // Camera smoothly follows player
-    const targetCamZ = -currentLane * STEP_SIZE;
+    // Camera framed on lower third of viewport
+    const targetCamZ = -currentLane * STEP_SIZE - 20;
     smoothCameraZ += (targetCamZ - smoothCameraZ) * 0.08;
     smoothCameraX += (chicken.position.x - smoothCameraX) * 0.08;
 
@@ -194,7 +193,7 @@ function init() {
       camOffset.y,
       smoothCameraZ + camOffset.z
     );
-    camera.lookAt(smoothCameraX, 0, smoothCameraZ);
+    camera.lookAt(smoothCameraX, 0, smoothCameraZ + 20);
 
     // Vehicles
     for (let i = 0; i < vehicles.length; i++) {
