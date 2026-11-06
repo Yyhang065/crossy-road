@@ -1,6 +1,6 @@
 import { setupSettings } from './settings.js';
 
-export function setupUI(handlers) {
+export function setupUI(handlers, videoCallbacks) {
   const get = (id) => document.getElementById(id);
 
   const homeScreen = get('home-screen');
@@ -46,5 +46,5 @@ export function setupUI(handlers) {
     handlers.onRestart();
   });
 
-  setupSettings();
+  setupSettings(videoCallbacks);
 }
