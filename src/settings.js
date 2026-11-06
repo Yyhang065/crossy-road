@@ -1,10 +1,10 @@
 import { setLanguage } from './i18n.js';
 
-export function setupSettings() {
+export function setupSettings(videoCallbacks = {}) {
   const get = (id) => document.getElementById(id);
   const controlsContainer = get('controls-container');
 
-  // Tab switching
+  // Tabs
   const tabButtons = document.querySelectorAll('.tab-btn');
   const tabContents = document.querySelectorAll('.tab-content');
 
@@ -20,7 +20,7 @@ export function setupSettings() {
     };
   });
 
-  // Controls auto-detect and layout logic
+  // Controls auto-detect and layout
   let controlMode = 'auto';
   let touchLayout = 'auto';
 
@@ -65,6 +65,32 @@ export function setupSettings() {
     opacitySelect.onchange = (e) => {
       if (controlsContainer) controlsContainer.style.opacity = e.target.value;
     };
+  }
+
+  // Video Settings Callbacks
+  const shadowSelect = get('shadows-select');
+  if (shadowSelect && videoCallbacks.onShadowChange) {
+    shadowSelect.onchange = (e) => videoCallbacks.onShadowChange(e.target.value === 'on');
+  }
+
+  const fogSelect = get('fog-select');
+  if (fogSelect && videoCallbacks.onFogChange) {
+    fogSelect.onchange = (e) => videoCallbacks.onFogChange(e.target.value === 'on');
+  }
+
+  const distSelect = get('render-dist-select');
+  if (distSelect && videoCallbacks.onDistanceChange) {
+    distSelect.onchange = (e) => videoCallbacks.onDistanceChange(parseInt(e.target.value, 10));
+  }
+
+  const fpsSelect = get('fps-select');
+  if (fpsSelect && videoCallbacks.onFpsChange) {
+    fpsSelect.onchange = (e) => videoCallbacks.onFpsChange(parseInt(e.target.value, 10));
+  }
+
+  const densitySelect = get('density-select');
+  if (densitySelect && videoCallbacks.onDensityChange) {
+    densitySelect.onchange = (e) => videoCallbacks.onDensityChange(e.target.value);
   }
 
   const langSelect = get('language-select');
