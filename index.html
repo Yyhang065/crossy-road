@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-  <link rel="icon" type="image/png" href="./favicon.png?v=1.3.0">
+  <link rel="icon" type="image/png" href="./favicon.png?v=1.3.1">
   <title>Crossy Roads</title>
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="./settings.css">
@@ -54,7 +54,7 @@
   <!-- Start Screen -->
   <div id="home-screen" class="overlay-screen">
     <div class="title" data-i18n="gameTitle">CROSSY ROAD</div>
-    <div class="version-badge">v1.3.0</div>
+    <div class="version-badge">v1.3.1</div>
     <div class="btn-group">
       <button class="menu-btn" id="start-btn" data-i18n="tapToPlay">TAP TO PLAY</button>
       <button class="menu-btn secondary-btn" id="log-btn" data-i18n="updateLog">UPDATE LOG</button>
@@ -117,15 +117,50 @@
       <!-- Video Tab -->
       <div class="tab-content" id="tab-video">
         <div class="setting-row">
-          <span class="setting-label" data-i18n="shadows">Shadows</span>
+          <span class="setting-label">Shadows</span>
           <select id="shadows-select" class="setting-select">
+            <option value="on" selected>Enabled (Sharp)</option>
+            <option value="off">Disabled</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Atmospheric Fog</span>
+          <select id="fog-select" class="setting-select">
             <option value="on" selected>Enabled</option>
             <option value="off">Disabled</option>
           </select>
         </div>
         <div class="setting-row">
-          <span class="setting-label" data-i18n="cameraAngle">Camera Angle</span>
-          <span class="setting-badge" data-i18n="lockedIso">Locked Isometric</span>
+          <span class="setting-label">Render Distance</span>
+          <select id="render-dist-select" class="setting-select">
+            <option value="35">Near (35 Lanes)</option>
+            <option value="55" selected>Standard (55 Lanes)</option>
+            <option value="80">Far (80 Lanes)</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Max Framerate (FPS)</span>
+          <select id="fps-select" class="setting-select">
+            <option value="0" selected>Uncapped (Device Max)</option>
+            <option value="60">60 FPS</option>
+            <option value="30">30 FPS (Battery Saver)</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Render Scale / Pixel Density</span>
+          <select id="density-select" class="setting-select">
+            <option value="auto" selected>Native Retina (Auto)</option>
+            <option value="1">1.0x (Standard)</option>
+            <option value="0.75">0.75x (Low Power)</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Anti-Aliasing</span>
+          <span class="setting-badge">Hardware MSAA (On)</span>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Camera Angle</span>
+          <span class="setting-badge">Locked Isometric</span>
         </div>
       </div>
 
@@ -171,14 +206,21 @@
       <div class="log-entries">
         <div class="log-entry current">
           <div class="log-header">
-            <span class="tag">v1.3.0</span>
-            <span class="date">Latest</span>
+            <span class="tag">v1.3.1</span>
+            <span class="date">Grid & Performance</span>
           </div>
           <ul>
-            <li>Revamped 4-tab settings: Controls, Video, Audio, and Language.</li>
-            <li>Dynamic control mode detecting touch devices, orientation, and keyboards.</li>
-            <li>Lower-third isometric camera angle matching classic Crossy Road.</li>
-            <li>Randomized cuboid trees, lavender rocks, and multi-log rivers.</li>
+            <li>Implemented strict integer grid system (X & Z discrete steps).</li>
+            <li>Direct spatial cell map occupancy checks for obstacle collision.</li>
+            <li>Added Video options: Fog, Render Distance, Max FPS cap, and Render Scale.</li>
+          </ul>
+        </div>
+        <div class="log-entry">
+          <div class="log-header">
+            <span class="tag">v1.3.0</span>
+          </div>
+          <ul>
+            <li>Categorized Settings dialog, locked isometric camera framing.</li>
           </ul>
         </div>
       </div>
