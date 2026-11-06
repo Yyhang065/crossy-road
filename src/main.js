@@ -1,5 +1,5 @@
 import { createChicken } from './chicken.js';
-import { createLane } from './lanes.js';
+import { createLane, GRID_SIZE, MIN_COL, MAX_COL } from './lanes.js';
 import { setupControls } from './controls.js';
 import { setupUI } from './ui.js';
 
@@ -9,55 +9,89 @@ function init() {
     throw new Error('Three.js failed to load.');
   }
 
-  const STEP_SIZE = 20;
-
   let score = 0;
-  let maxLaneReached = 0;
-  let currentLane = 0;
-  let currentX = 0;
+  let maxRowReached = 0;
+  let currentRow = 0;
+  let currentCol = 0;
   let gameStarted = false;
   let isPaused = false;
+
+  // Video Settings state
+  let renderDistanceLanes = 55;
+  let maxFps = 0; // 0 = uncapped
+  let lastFrameTime = 0;
 
   const lanes = [];
   const vehicles = [];
   const floaters = [];
-  const obstacles = [];
+  const gridOccupancy = new Map();
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x81d4fa);
+  const skyColor = 0x81d4fa;
+  scene.background = new THREE.Color(skyColor);
 
-  // Orthographic Camera locked to lower-third authentic perspective
+  // Fog Setting
+  scene.fog = new THREE.Fog(skyColor, 260, 480);
+
+  // Orthographic Camera
   const d = 110;
   const aspect = window.innerWidth / window.innerHeight;
-  const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 2000);
-
-  // Fixed camera POV offset
+  const camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 1, 2500);
   const camOffset = { x: 95, y: 135, z: 95 };
 
+  // Renderer with Hardware Anti-Aliasing (MSAA)
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  function updatePixelRatio(mode = 'auto') {
+    if (mode === 'auto') {
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    } else {
+      renderer.setPixelRatio(parseFloat(mode));
+    }
+  }
+  updatePixelRatio();
 
   const container = document.getElementById('canvas-container') || document.body;
   container.innerHTML = '';
   container.appendChild(renderer.domElement);
 
   // Lighting
-  scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
+  scene.add(ambientLight);
+
   const sunLight = new THREE.DirectionalLight(0xffffff, 0.7);
-  sunLight.position.set(110, 220, 90);
+  sunLight.position.set(110, 240, 90);
+  sunLight.castShadow = true;
+  sunLight.shadow.mapSize.width = 1024;
+  sunLight.shadow.mapSize.height = 1024;
+  sunLight.shadow.camera.near = 10;
+  sunLight.shadow.camera.far = 600;
+  sunLight.shadow.camera.left = -200;
+  sunLight.shadow.camera.right = 200;
+  sunLight.shadow.camera.top = 200;
+  sunLight.shadow.camera.bottom = -200;
   scene.add(sunLight);
 
   // Chicken
   const chicken = createChicken();
   chicken.position.set(0, 0, 0);
+  chicken.traverse((child) => {
+    if (child.isMesh) {
+      child.castShadow = true;
+      child.receiveShadow = true;
+    }
+  });
   scene.add(chicken);
 
   camera.position.set(camOffset.x, camOffset.y, camOffset.z);
   camera.lookAt(0, 0, 0);
 
-  for (let i = 0; i < 40; i++) {
-    lanes.push(createLane(i, STEP_SIZE, scene, vehicles, floaters, obstacles));
+  // Initial Lane Generation
+  for (let r = 0; r < renderDistanceLanes; r++) {
+    lanes.push(createLane(r, scene, vehicles, floaters, gridOccupancy));
   }
 
   const jump = {
@@ -66,7 +100,7 @@ function init() {
     startZ: 0,
     targetX: 0,
     targetZ: 0,
-    duration: 140,
+    duration: 135,
     startTime: 0
   };
 
@@ -74,63 +108,69 @@ function init() {
   let smoothCameraX = 0;
   let activeFloater = null;
 
-  function isBlocked(x, z) {
-    return obstacles.some(obs => Math.abs(obs.x - x) < 9 && Math.abs(obs.z - z) < 9);
+  // Strict Grid Spatial Query
+  function isCellBlocked(col, row) {
+    if (col < MIN_COL || col > MAX_COL) return true;
+    return gridOccupancy.has(`${col},${row}`);
   }
 
   function triggerMove(dir) {
     if (!gameStarted || isPaused || jump.isJumping) return;
 
-    let nextLane = currentLane;
-    let nextX = currentX;
+    let targetCol = currentCol;
+    let targetRow = currentRow;
 
     if (dir === 'up') {
-      nextLane++;
+      targetRow++;
       chicken.rotation.y = 0;
-    } else if (dir === 'down' && currentLane > 0) {
-      nextLane--;
+    } else if (dir === 'down' && currentRow > 0) {
+      targetRow--;
       chicken.rotation.y = Math.PI;
     } else if (dir === 'left') {
-      nextX -= STEP_SIZE;
+      targetCol--;
       chicken.rotation.y = Math.PI / 2;
     } else if (dir === 'right') {
-      nextX += STEP_SIZE;
+      targetCol++;
       chicken.rotation.y = -Math.PI / 2;
     } else {
       return;
     }
 
-    const targetZ = -nextLane * STEP_SIZE;
-    if (isBlocked(nextX, targetZ)) return;
+    // Grid collision pre-flight check
+    if (isCellBlocked(targetCol, targetRow)) return;
 
     activeFloater = null;
-    currentLane = nextLane;
-    currentX = nextX;
+    currentCol = targetCol;
+    currentRow = targetRow;
 
     jump.startX = chicken.position.x;
     jump.startZ = chicken.position.z;
-    jump.targetX = currentX;
-    jump.targetZ = targetZ;
+    jump.targetX = currentCol * GRID_SIZE;
+    jump.targetZ = -currentRow * GRID_SIZE;
     jump.isJumping = true;
     jump.startTime = performance.now();
 
-    if (currentLane > maxLaneReached) {
-      maxLaneReached = currentLane;
-      score = maxLaneReached;
+    if (currentRow > maxRowReached) {
+      maxRowReached = currentRow;
+      score = maxRowReached;
       const scoreBoard = document.getElementById('score-board');
       if (scoreBoard) scoreBoard.innerText = score;
-      lanes.push(createLane(lanes.length, STEP_SIZE, scene, vehicles, floaters, obstacles));
+
+      // Maintain buffer
+      while (lanes.length < currentRow + renderDistanceLanes) {
+        lanes.push(createLane(lanes.length, scene, vehicles, floaters, gridOccupancy));
+      }
     }
   }
 
   function resetRun() {
-    currentLane = 0;
-    currentX = 0;
+    currentRow = 0;
+    currentCol = 0;
     chicken.position.set(0, 0, 0);
     chicken.rotation.y = 0;
     jump.isJumping = false;
     activeFloater = null;
-    maxLaneReached = 0;
+    maxRowReached = 0;
     score = 0;
     const scoreBoard = document.getElementById('score-board');
     if (scoreBoard) scoreBoard.innerText = score;
@@ -141,22 +181,55 @@ function init() {
   }
 
   setupControls(triggerMove);
-  setupUI({
-    onStart: () => {
-      gameStarted = true;
-      isPaused = false;
+
+  // UI & Video Settings hooks
+  setupUI(
+    {
+      onStart: () => {
+        gameStarted = true;
+        isPaused = false;
+      },
+      onPause: () => { isPaused = true; },
+      onResume: () => { isPaused = false; },
+      onRestart: () => {
+        isPaused = false;
+        resetRun();
+      }
     },
-    onPause: () => { isPaused = true; },
-    onResume: () => { isPaused = false; },
-    onRestart: () => {
-      isPaused = false;
-      resetRun();
+    {
+      onShadowChange: (enabled) => {
+        sunLight.castShadow = enabled;
+        renderer.shadowMap.enabled = enabled;
+      },
+      onFogChange: (enabled) => {
+        scene.fog = enabled ? new THREE.Fog(skyColor, 260, 480) : null;
+      },
+      onDistanceChange: (dist) => {
+        renderDistanceLanes = dist;
+        while (lanes.length < currentRow + renderDistanceLanes) {
+          lanes.push(createLane(lanes.length, scene, vehicles, floaters, gridOccupancy));
+        }
+      },
+      onFpsChange: (fps) => {
+        maxFps = fps;
+      },
+      onDensityChange: (density) => {
+        updatePixelRatio(density);
+      }
     }
-  });
+  );
 
   function animate(now) {
     requestAnimationFrame(animate);
     if (isPaused) return;
+
+    // Framerate Throttle
+    if (maxFps > 0) {
+      const interval = 1000 / maxFps;
+      const delta = now - lastFrameTime;
+      if (delta < interval) return;
+      lastFrameTime = now - (delta % interval);
+    }
 
     if (jump.isJumping) {
       const elapsed = now - jump.startTime;
@@ -176,15 +249,17 @@ function init() {
       }
     } else if (activeFloater && activeFloater.userData.speed) {
       chicken.position.x += activeFloater.userData.speed;
-      currentX = chicken.position.x;
-      if (chicken.position.x > 130 || chicken.position.x < -130) {
+      // Snap grid column tracking
+      currentCol = Math.round(chicken.position.x / GRID_SIZE);
+
+      if (chicken.position.x > 125 || chicken.position.x < -125) {
         resetRun();
         return;
       }
     }
 
-    // Camera framed on lower third of viewport
-    const targetCamZ = -currentLane * STEP_SIZE - 20;
+    // Camera follow
+    const targetCamZ = -currentRow * GRID_SIZE - 20;
     smoothCameraZ += (targetCamZ - smoothCameraZ) * 0.08;
     smoothCameraX += (chicken.position.x - smoothCameraX) * 0.08;
 
@@ -194,6 +269,11 @@ function init() {
       smoothCameraZ + camOffset.z
     );
     camera.lookAt(smoothCameraX, 0, smoothCameraZ + 20);
+
+    // Keep sunlight moving with player for shadow stability
+    sunLight.position.set(smoothCameraX + 110, 240, smoothCameraZ + 90);
+    sunLight.target.position.set(smoothCameraX, 0, smoothCameraZ);
+    sunLight.target.updateMatrixWorld();
 
     // Vehicles
     for (let i = 0; i < vehicles.length; i++) {
@@ -211,7 +291,7 @@ function init() {
       }
     }
 
-    // Floating platforms
+    // Floaters
     let onFloater = false;
     for (let i = 0; i < floaters.length; i++) {
       const f = floaters[i];
@@ -233,7 +313,7 @@ function init() {
 
     // Water collision
     if (!jump.isJumping) {
-      const lane = lanes[currentLane];
+      const lane = lanes[currentRow];
       if (lane && lane.type === 'water' && !onFloater) {
         resetRun();
         return;
